@@ -5,7 +5,7 @@ import locale
 locale.setlocale(locale.LC_ALL, 'ko_KR')
 
 # Create a subclass of Strategy to define the indicators and logic
-class SmaCross(bt.Strategy):
+clasㅍㄴ챙ㄷ (bt.Strategy):
     # list of parameters which are configurable for the strategy
     params = dict(
         pfast=5,  # period for the fast moving average
@@ -67,5 +67,6 @@ final_value = cerebro.broker.getvalue()
 print('* start value : %s won' % locale.format_string('%d', start_value, grouping=True))
 print('* final value : %s won' % locale.format_string('%d', final_value, grouping=True))
 print('* earning rate : %.2f %%' % ((final_value - start_value) / start_value * 100.0))
+
 
 cerebro.plot()  # and plot it with a single command
