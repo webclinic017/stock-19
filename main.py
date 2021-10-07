@@ -2,7 +2,6 @@ from datetime import datetime
 import backtrader as bt
 import locale
 
-
 locale.setlocale(locale.LC_ALL, 'ko_KR')
 
 # Create a subclass of Strategy to define the indicators and logic
