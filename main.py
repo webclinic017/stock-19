@@ -5,7 +5,7 @@ import locale
 locale.setlocale(locale.LC_ALL, 'ko_KR')
 
 # Create a subclass of Strategy to define the indicators and logic
-clasㅍㄴ챙ㄷ (bt.Strategy):
+class SmaCross(bt.Strategy):
     # list of parameters which are configurable for the strategy
     params = dict(
         pfast=5,  # period for the fast moving average
@@ -51,8 +51,12 @@ cerebro = bt.Cerebro()  # create a "Cerebro" engine instance
 cerebro.broker.setcash(100000)
 cerebro.broker.setcommission(0.002)
 
+#   KODEX 미국달러선물 : 261240
+#   KODEX 200 : 069500
+#   삼성전자 : 005930
+
 # Create a data feed
-data = bt.feeds.YahooFinanceData(dataname='005930.KS',
+data = bt.feeds.YahooFinanceData(dataname='0011001.KS',
                                  fromdate=datetime(2019, 1, 1),
                                  todate=datetime.now())
 
@@ -67,6 +71,5 @@ final_value = cerebro.broker.getvalue()
 print('* start value : %s won' % locale.format_string('%d', start_value, grouping=True))
 print('* final value : %s won' % locale.format_string('%d', final_value, grouping=True))
 print('* earning rate : %.2f %%' % ((final_value - start_value) / start_value * 100.0))
-
 
 cerebro.plot()  # and plot it with a single command
