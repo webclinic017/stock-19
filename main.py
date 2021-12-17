@@ -51,12 +51,8 @@ cerebro = bt.Cerebro()  # create a "Cerebro" engine instance
 cerebro.broker.setcash(100000)
 cerebro.broker.setcommission(0.002)
 
-#   KODEX 미국달러선물 : 261240
-#   KODEX 200 : 069500
-#   삼성전자 : 005930
-
 # Create a data feed
-data = bt.feeds.YahooFinanceData(dataname='0011001.KS',
+data = bt.feeds.YahooFinanceData(dataname='005930.KS',
                                  fromdate=datetime(2019, 1, 1),
                                  todate=datetime.now())
 
