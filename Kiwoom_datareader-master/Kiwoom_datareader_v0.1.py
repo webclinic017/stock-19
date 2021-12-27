@@ -130,6 +130,8 @@ class MainWindow(QMainWindow, form_class):
         # con = sqlite3.connect("./stock_price_"+base_date+"_"+code +".db")
         # df.to_sql(code, con, if_exists='replace')
         # df.to_csv("stock_price_"+ code +".csv")
+        print(firstdate)
+        print(lastdate)
 
         df.to_csv("./data/분봉_"+name+"_"+firstdate+"_"+lastdate+".csv")
 
