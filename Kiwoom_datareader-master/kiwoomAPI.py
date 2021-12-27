@@ -9,14 +9,15 @@ from PyQt5.QtCore import *
 
 import decorators
 
-TR_REQ_TIME_INTERVAL = 0.5
-
 
 class KiwoomAPI(QAxWidget):
+    
+    TR_REQ_TIME_INTERVAL = 0.5
+
     def __init__(self):
         super().__init__()
         self._create_kiwoom_instance()
-        self._set_signal_slots()
+        self._set_signal_slots()    
 
     def _create_kiwoom_instance(self):
         self.setControl("KHOPENAPI.KHOpenAPICtrl.1")
@@ -74,7 +75,7 @@ class KiwoomAPI(QAxWidget):
         self.tr_event_loop.exec_()
 
         # 키움 Open API는 시간당 request 제한이 있기 때문에 딜레이를 줌
-        time.sleep(TR_REQ_TIME_INTERVAL)
+        time.sleep(self.TR_REQ_TIME_INTERVAL)
 
     def comm_get_data(self, code, real_type, field_name, index, item_name):
         ret = self.dynamicCall("CommGetData(QString, QString, QString, int, QString)", code,

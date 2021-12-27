@@ -99,12 +99,12 @@
      </property>
      <item>
       <property name="text">
-       <string>일봉</string>
+       <string>분봉</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>분봉</string>
+       <string>일봉</string>
       </property>
      </item>
     </widget>

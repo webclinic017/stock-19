@@ -39,6 +39,9 @@ class MainWindow(QMainWindow, form_class):
 
         # pushButton '실행'이 클릭될 시 실행될 함수 연결
         self.pushButton.clicked.connect(self.fetch_chart_data)
+        
+        KiwoomAPI.TR_REQ_TIME_INTERVAL = 0.5
+        self.lineEdit.setText("323410")
 
     def timeout_1s(self):
         current_time = QTime.currentTime()
@@ -69,6 +72,7 @@ class MainWindow(QMainWindow, form_class):
     def fetch_chart_data(self):
 
         code = self.lineEdit.text()
+        name = self.kw.get_master_code_name(code)
         tick_unit = self.comboBox.currentText()
         # 일단 tick range = 1 인 경우만 구현함.
         # tick_range = self.comboBox_2.currentText()
@@ -113,14 +117,21 @@ class MainWindow(QMainWindow, form_class):
                 for key, val in self.kw.latest_tr_data.items():
                     ohlcv[key][-1:] = val
 
-        df = pd.DataFrame(ohlcv, columns=['open', 'high', 'low', 'close', 'volume'],
-                          index=ohlcv['date'])
+        df = pd.DataFrame(ohlcv, columns=['date','open', 'high', 'low', 'close', 'volume'])
+
+        df.insert(2,'time', df['date'].astype('int64')%1000000)
+        df['date'] = df['date'].astype('int64')/1000000
+
+        firstdate = str(df.min()['date'].astype('int64'))
+        lastdate = str(df.max()['date'].astype('int64'))
         
         # df.rename(index={'date': 'Date'}, columns={'open':'Open','high':'High','low':'Low','close':'Close','volume':'Volume','high':'High'})
-        con = sqlite3.connect("./stock_price_"+base_date+"_"+code +".db")
-        df.to_sql(code, con, if_exists='replace')
-        df.to_csv("stock_price"+base_date+"_"+code +".csv")
 
+        # con = sqlite3.connect("./stock_price_"+base_date+"_"+code +".db")
+        # df.to_sql(code, con, if_exists='replace')
+        # df.to_csv("stock_price_"+ code +".csv")
+
+        df.to_csv("./data/분봉_"+name+"_"+firstdate+"_"+lastdate+".csv")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
