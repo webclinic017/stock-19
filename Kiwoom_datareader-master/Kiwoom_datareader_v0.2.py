@@ -3,7 +3,7 @@ import time
 import sys
 import datetime
 import pandas as pd
-import threading
+import os
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5 import QtGui
@@ -33,23 +33,28 @@ class MainWindow(QMainWindow, form_class):
         self.timer_1s.start(1000)
         self.timer_1s.timeout.connect(self.timeout_1s)
 
-        KiwoomAPI.TR_REQ_TIME_INTERVAL = 2
+        KiwoomAPI.TR_REQ_TIME_INTERVAL = 6
 
         # pushButton '실행'이 클릭될 시 실행될 함수 연결
         self.pushButton.clicked.connect(self.start_button)
         
-        # list = self.kw.dynamicCall("GetCodeListByMarket(QString)",0)
-        # kospi = list.split(';')
-        # for code in kospi:
-        #     # name = self.kw.get_master_code_name(code)
-        #     # self.addItemText = code
-        #     # print(self.addItemText)    
-        #     self.listWidget_Test1.addItem(code)
+        file_list = os.listdir("./data")
+        print(file_list)
+        data_has_list = [] 
+        for file in file_list:
+            matched_code = file.split("_")[2]
+            data_has_list.append(matched_code)
+        print(data_has_list)
+            
+        kospi = self.kw.get_code_list_by_market(0)
+        for code in kospi:
+            if code not in data_has_list :
+                self.listWidget_Test1.addItem(code)
 
-        list = self.kw.dynamicCall("GetCodeListByMarket(QString)",10)
-        kosdoq = list.split(';')
+        kosdoq = self.kw.get_code_list_by_market(10)
         for code in kosdoq:
-            self.listWidget_Test1.addItem(code)
+            if code not in data_has_list :
+                self.listWidget_Test1.addItem(code)
 
     def timeout_1s(self):
         current_time = QTime.currentTime()
@@ -117,9 +122,7 @@ class MainWindow(QMainWindow, form_class):
         df.to_csv("./data/분봉_"+name+"_"+code+"_"+firstdate+"_"+lastdate+".csv")
 
     def start_button_each(self):
-        print(str(self.listWidget_Test1.count()))
         for i in range(self.listWidget_Test1.count()) :
-            print(i)
             item = self.listWidget_Test1.takeItem(i)
             code = item.text()
             name = self.kw.get_master_code_name(code)
