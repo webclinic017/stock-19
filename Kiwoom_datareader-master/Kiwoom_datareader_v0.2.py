@@ -33,7 +33,7 @@ class MainWindow(QMainWindow, form_class):
         self.timer_1s.start(1000)
         self.timer_1s.timeout.connect(self.timeout_1s)
 
-        KiwoomAPI.TR_REQ_TIME_INTERVAL = 1
+        KiwoomAPI.TR_REQ_TIME_INTERVAL = 2
 
         # pushButton '실행'이 클릭될 시 실행될 함수 연결
         self.pushButton.clicked.connect(self.start_button)
@@ -49,9 +49,6 @@ class MainWindow(QMainWindow, form_class):
         list = self.kw.dynamicCall("GetCodeListByMarket(QString)",10)
         kosdoq = list.split(';')
         for code in kosdoq:
-            # name = self.kw.get_master_code_name(code)
-            # self.addItemText = code
-            # print(self.addItemText)    
             self.listWidget_Test1.addItem(code)
 
     def timeout_1s(self):
@@ -74,8 +71,9 @@ class MainWindow(QMainWindow, form_class):
         self.statusbar.showMessage(statusbar_msg)
 
     def start_button(self):
-        t = threading.Thread(target=self.start_button_each,args=())
-        t.start()
+        self.start_button_each()
+        # t = threading.Thread(target=self.start_button_each,args=())
+        # t.start()
 
     def fetch_minuate_data(self,code):
         name = self.kw.get_master_code_name(code)
@@ -116,13 +114,13 @@ class MainWindow(QMainWindow, form_class):
         print(firstdate)
         print(lastdate)
 
-        df.to_csv("./data/분봉_"+name+"_"+firstdate+"_"+lastdate+".csv")
+        df.to_csv("./data/분봉_"+name+"_"+code+"_"+firstdate+"_"+lastdate+".csv")
 
     def start_button_each(self):
         print(str(self.listWidget_Test1.count()))
         for i in range(self.listWidget_Test1.count()) :
             print(i)
-            item = self.listWidget_Test1.item(i)
+            item = self.listWidget_Test1.takeItem(i)
             code = item.text()
             name = self.kw.get_master_code_name(code)
             fullname = name + "("+code+")"
