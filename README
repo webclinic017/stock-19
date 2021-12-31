@@ -7,7 +7,6 @@ backtrader
 https://community.backtrader.com/topic/3979/help-with-yahoofinance-data/2
 pip install yfinance
 
-
 data 
 - 분봉 데이터 
 
@@ -15,5 +14,6 @@ kakao_message
 - 시그널 올때 kakao 로 메시지 보내는 모듈
 
 Kiwoom_datareader-master
+- 키움 API 는 32bit 에서만 동작
 - 분봉 데이터 얻어오는 모듈
 
