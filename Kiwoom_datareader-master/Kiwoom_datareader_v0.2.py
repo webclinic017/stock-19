@@ -15,46 +15,58 @@ import decorators
 form_class = uic.loadUiType("Kiwoom_datareader-master/Kiwoom_datareader_v0.2.ui")[0]
 
 class MainWindow(QMainWindow, form_class):
+    
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.connect()
+        
+        # timer 등록. 1초 마다 연결 상태 확인
+        self.timer_1s = QTimer(self)
+        self.timer_1s.start(10000)
+        self.timer_1s.timeout.connect(self.timeout_1s)
 
+        # 최초 TR interval 설정 
+        KiwoomAPI.TR_REQ_TIME_INTERVAL = 2
+        self.time_interval_line_edit.setText(str(KiwoomAPI.TR_REQ_TIME_INTERVAL))
+
+        # 버튼 listener 연결
+        self.start_push_button.clicked.connect(self.start_button)
+        self.reconnect_push_button.clicked.connect(self.reconnect_button)
+        self.time_interval_line_edit.returnPressed.connect(self.line_edit_changed)
+
+    # enter 입력시 time_interval 변경
+    def line_edit_changed(self):
+        KiwoomAPI.TR_REQ_TIME_INTERVAL = float(self.time_interval_line_edit.text())
+        print(KiwoomAPI.TR_REQ_TIME_INTERVAL)
+
+    def connect(self):
         self.kw = KiwoomAPI()
-
-        # login
         self.kw.comm_connect()
 
         # status bar 에 출력할 메세지를 저장하는 변수
         # 어떤 모듈의 실행 완료를 나타낼 때 쓰인다.
         self.return_status_msg = ''
+        self.update_candidate_widget()
 
-        # timer 등록. tick per 1s
-        self.timer_1s = QTimer(self)
-        self.timer_1s.start(1000)
-        self.timer_1s.timeout.connect(self.timeout_1s)
-
-        KiwoomAPI.TR_REQ_TIME_INTERVAL = 6
-
-        # pushButton '실행'이 클릭될 시 실행될 함수 연결
-        self.pushButton.clicked.connect(self.start_button)
-        
+    # 왼쪽 list widget 
+    def update_candidate_widget(self):
         file_list = os.listdir("./data")
-        print(file_list)
         data_has_list = [] 
         for file in file_list:
             matched_code = file.split("_")[2]
             data_has_list.append(matched_code)
-        print(data_has_list)
+        # print(data_has_list)
             
         kospi = self.kw.get_code_list_by_market(0)
         for code in kospi:
             if code not in data_has_list :
-                self.listWidget_Test1.addItem(code)
+                self.candidate_list_widget.addItem(code)
 
         kosdoq = self.kw.get_code_list_by_market(10)
         for code in kosdoq:
             if code not in data_has_list :
-                self.listWidget_Test1.addItem(code)
+                self.candidate_list_widget.addItem(code)
 
     def timeout_1s(self):
         current_time = QTime.currentTime()
@@ -65,8 +77,10 @@ class MainWindow(QMainWindow, form_class):
         state = self.kw.get_connect_state()
         if state == 1:
             state_msg = "서버 연결 중"
+            self.reconnect_push_button.setEnabled(False)
         else:
             state_msg = "서버 미 연결 중"
+            self.reconnect_push_button.setEnabled(True)
 
         if self.return_status_msg == '':
             statusbar_msg = state_msg + " | " + time_msg
@@ -75,10 +89,13 @@ class MainWindow(QMainWindow, form_class):
 
         self.statusbar.showMessage(statusbar_msg)
 
+    def reconnect_button(self):
+        self.line_edit_changed()
+        self.connect()
+
     def start_button(self):
-        self.start_button_each()
-        # t = threading.Thread(target=self.start_button_each,args=())
-        # t.start()
+        self.line_edit_changed()
+        self.start_button_internally()
 
     def fetch_minuate_data(self,code):
         name = self.kw.get_master_code_name(code)
@@ -105,8 +122,8 @@ class MainWindow(QMainWindow, form_class):
 
         df = pd.DataFrame(ohlcv, columns=['date','open', 'high', 'low', 'close', 'volume'])
 
-        df.insert(2,'time', df['date'].astype('int64')%1000000)
-        df['date'] = df['date'].astype('int64')/1000000
+        df.insert(1,'time', df['date'].astype('int64')%1000000)
+        df['date'] = (df['date'].astype('int64')/1000000).astype('int64')
 
         firstdate = str(df.min()['date'].astype('int64'))
         lastdate = str(df.max()['date'].astype('int64'))
@@ -121,14 +138,14 @@ class MainWindow(QMainWindow, form_class):
 
         df.to_csv("./data/분봉_"+name+"_"+code+"_"+firstdate+"_"+lastdate+".csv")
 
-    def start_button_each(self):
-        for i in range(self.listWidget_Test1.count()) :
-            item = self.listWidget_Test1.takeItem(i)
+    def start_button_internally(self):
+        for i in range(self.candidate_list_widget.count()) :
+            item = self.candidate_list_widget.takeItem(i)
             code = item.text()
             name = self.kw.get_master_code_name(code)
             fullname = name + "("+code+")"
             print("Start  " + fullname)
-            self.listWidget_Test2.addItem(name + "("+code+")")
+            self.finished_list_widget.addItem(name + "("+code+")")
             self.fetch_minuate_data(code)
             print("Done  " + fullname)
 
