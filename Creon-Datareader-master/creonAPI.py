@@ -26,6 +26,7 @@ def check_PLUS_status(original_func):
 # 서버로부터 과거의 차트 데이터 가져오는 클래스
 class CpStockChart:
     def __init__(self):
+        self.INTERVAL_TIME = 0.25
         self.objStockChart = win32com.client.Dispatch("CpSysDib.StockChart")
 
     def _check_rq_status(self):
@@ -145,7 +146,7 @@ class CpStockChart:
                                                 4, # 저가
                                                 5, # 종가
                                                 8, # 거래량
-                                                12,  #상장주식수
+                                                13,  # 시가총액
                                                 14,  # 외국인주문한도수량
                                                 16,  # 외국인현보유수량
                                                 17,  # 외국인현보유비율
@@ -154,7 +155,7 @@ class CpStockChart:
                                                 ])
             # 요청한 항목들을 튜플로 만들어 사용
             rq_column = ('date', 'time', 'open', 'high', 'low', 'close', 'volume', 
-                         '상장주식수', '외국인주문한도수량', '외국인현보유수량', '외국인현보유비율', '기관순매수', '기관누적순매수')
+                         '시가총액', '외국인주문한도수량', '외국인현보유수량', '외국인현보유비율', '기관순매수', '기관누적순매수')
 
         self.objStockChart.SetInputValue(6, dwm)  # '차트 주기 - 분/틱
         self.objStockChart.SetInputValue(7, tick_range)  # 분틱차트 주기
