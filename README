@@ -16,8 +16,10 @@ kakao_message
 Kiwoom_datareader-master
 - 키움 API 는 32bit 에서만 동작
 - 분봉 데이터 얻어오는 모듈
+- python 32bit 환경에서만 가능 
 
 Creon-Datareader-master
+- python 32bit 환경에서만 가능 
 - 키움에서는 TR 제한이 있어서 변경
 - 대신증권 15초당 60회 제한
 - 분봉은 ./db/분봉_종목코드_종목명.db 로 저장됨
