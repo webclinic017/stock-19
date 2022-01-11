@@ -12,7 +12,6 @@ from PyQt5 import QtGui
 from PyQt5 import uic
 
 import numpy as np
-from pathlib import Path
 
 import creonAPI
 import decorators
@@ -147,8 +146,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     
     def update_price_db(self):
         self.pushButton.setEnabled(False)
-        self.update_price_db_min()
         self.update_price_db_day()
+        self.update_price_db_min()
         self.pushButton.setEnabled(False)
 
     @decorators.return_status_msg_setter

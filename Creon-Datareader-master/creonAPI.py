@@ -1,10 +1,6 @@
 # coding=utf-8
 import win32com.client
 import time
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from creon_datareader_v1_0 import MainWindow
 
 g_objCpStatus = win32com.client.Dispatch('CpUtil.CpCybos')
 
