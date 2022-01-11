@@ -90,7 +90,7 @@ class CpStockChart:
         while count > rcv_count:
             self.objStockChart.BlockRequest()  # 요청! 후 응답 대기
             self._check_rq_status()  # 통신상태 검사
-            time.sleep(0.25)  # 시간당 RQ 제한으로 인해 장애가 발생하지 않도록 딜레이를 줌
+            time.sleep(self.INTERVAL_TIME)  # 시간당 RQ 제한으로 인해 장애가 발생하지 않도록 딜레이를 줌
 
             rcv_batch_len = self.objStockChart.GetHeaderValue(3)  # 받아온 데이터 개수
             rcv_batch_len = min(rcv_batch_len, count - rcv_count)  # 정확히 count 개수만큼 받기 위함
@@ -169,7 +169,7 @@ class CpStockChart:
         while count > rcv_count:
             self.objStockChart.BlockRequest()  # 요청! 후 응답 대기
             self._check_rq_status()  # 통신상태 검사
-            time.sleep(0.25)  # 시간당 RQ 제한으로 인해 장애가 발생하지 않도록 딜레이를 줌
+            time.sleep(self.INTERVAL_TIME)  # 시간당 RQ 제한으로 인해 장애가 발생하지 않도록 딜레이를 줌
 
             rcv_batch_len = self.objStockChart.GetHeaderValue(3)  # 받아온 데이터 개수
             rcv_batch_len = min(rcv_batch_len, count - rcv_count)  # 정확히 count 개수만큼 받기 위함
