@@ -28,7 +28,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.objStockChart = creonAPI.CpStockChart()
         self.objCodeMgr = creonAPI.CpCodeMgr()
-        self.objStockChart.INTERVAL_TIME = 0.1
+        self.objStockChart.INTERVAL_TIME = 0.2
 
         self.rcv_data = dict()  # RQ후 받아온 데이터 저장 멤버
         self.update_status_msg = ''  # status bar 에 출력할 메세지 저장 멤버
@@ -146,8 +146,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     
     def update_price_db(self):
         self.pushButton.setEnabled(False)
-        self.update_price_db_day()
         self.update_price_db_min()
+        self.update_price_db_day()
         self.pushButton.setEnabled(False)
 
     @decorators.return_status_msg_setter
