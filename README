@@ -25,3 +25,6 @@ Creon-Datareader-master
 - 분봉은 ./db/분봉_종목코드_종목명.db 로 저장됨
 - 일봉은 ./db/일봉_전종목.db 로 저장됨
 - https://wikidocs.net/41016
+
+QuantStats
+https://github.com/ranaroussi/quantstats

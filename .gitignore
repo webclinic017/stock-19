@@ -1,4 +1,3 @@
-*.pyc
 .qt_for_python/*
 Kiwoom_datareader-master/__pycache__/*.pyc
 Kiwoom_datareader-master/__pycache__/kiwoomAPI.cpython-38.pyc
