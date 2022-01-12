@@ -146,8 +146,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     
     def update_price_db(self):
         self.pushButton.setEnabled(False)
-        self.update_price_db_min()
         self.update_price_db_day()
+        self.update_price_db_min()
         self.pushButton.setEnabled(False)
 
     @decorators.return_status_msg_setter
@@ -205,8 +205,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @decorators.return_status_msg_setter
     def update_price_db_day(self, tick_unit = '일봉'):
         count = 20000  # 10000개면 현재부터 1980년 까지의 데이터에 해당함. 충분.
-        columns=['open', 'high', 'low', 'close', 'volume']
-                    # ,'상장주식수', '외국인주문한도수량', '외국인현보유수량', '외국인현보유비율', '기관순매수', '기관누적순매수']
+        columns=['open', 'high', 'low', 'close', 'volume'
+                    , '시가총액', '외국인현보유수량', '기관순매수']
+                    
 
         with sqlite3.connect(self.db_file_day) as con:
             cursor = con.cursor()
@@ -215,14 +216,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if row['일봉 갱신날짜'] :
                     from_date = row['일봉 갱신날짜']
                 else : 
-                    from_date = 0
+                    from_date = 20020101
 
                 if self.objStockChart.RequestDWM(code, ord('D'), count, self, from_date, ohlcv_only = False) == False :
                     print("RequestDWM() return False")
                     continue
 
                 df = pd.DataFrame(self.rcv_data, columns=columns, index=self.rcv_data['date'])
-
+                df['외국인 순매수']
                 # 기존 DB와 겹치는 부분 제거
                 if from_date != 0:
                     df = df.loc[:from_date]
