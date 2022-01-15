@@ -259,8 +259,32 @@ class CpStockChart:
         caller.rcv_data = rcv_data  # 받은 데이터를 caller의 멤버에 저장
         return True
 
-objStockChart = CpStockChart()
-ret, ret7254 = objStockChart.Request_investors_supply("A000020", 20000 , in_NumOrMoney = 1)
-if ret == False : 
-    print(' 7254 요청 실패')
-print(ret7254)
+# 종목코드 관리하는 클래스
+class CpCodeMgr:
+    def __init__(self):
+        self.objCodeMgr = win32com.client.Dispatch("CpUtil.CpCodeMgr")
+
+    # 마켓에 해당하는 종목코드 리스트 반환하는 메소드
+    def get_code_list(self, market):
+        """
+        :param market: 1:코스피, 2:코스닥, ...
+        :return: market에 해당하는 코드 list
+        """
+        code_list = self.objCodeMgr.GetStockListByMarket(market)
+        return code_list
+
+    # 부구분코드를 반환하는 메소드
+    def get_section_code(self, code):
+        section_code = self.objCodeMgr.GetStockSectionKind(code)
+        return section_code
+
+    # 종목 코드를 받아 종목명을 반환하는 메소드
+    def get_code_name(self, code):
+        code_name = self.objCodeMgr.CodeToName(code)
+        return code_name
+
+# objStockChart = CpStockChart()
+# ret, ret7254 = objStockChart.Request_investors_supply("A000020", 20000 , in_NumOrMoney = 1)
+# if ret == False : 
+#     print(' 7254 요청 실패')
+# print(ret7254)
