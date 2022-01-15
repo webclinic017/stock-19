@@ -122,7 +122,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def get_df_latest_day_db(self):
         # 로컬 DB에 저장된 종목 정보 가져와서 dataframe으로 저장
-        print(os.getcwd() + str(os.path.exists(self.db_file_day)) )
+        # print(os.getcwd() + str(os.path.exists(self.db_file_day)) )
         
         con = sqlite3.connect(self.db_file_day)
         cursor = con.cursor()
@@ -146,8 +146,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     
     def update_price_db(self):
         self.pushButton.setEnabled(False)
-        self.update_price_db_day()
-        self.update_price_db_min()
+        
+        # 분봉/일봉에 대해서만 아래 코드가 효과가 있음.
+        if is_market_open():
+            print("ERROR: 장중에는 데이터 수집에 오류가 있을 수 있습니다.")
+
+        if self.comboBox.currentText() in "일봉" : 
+            self.update_price_db_day()
+            self.update_price_db_min()
+        else :
+            self.update_price_db_min()
+            self.update_price_db_day()
+            
         self.pushButton.setEnabled(False)
 
     @decorators.return_status_msg_setter
@@ -155,11 +165,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         count = 200000  # 서버 데이터 최대 reach 약 18.5만 이므로 (18/02/25 기준)
         tick_range = 1
         columns=['open', 'high', 'low', 'close', 'volume']
-        
-        # 분봉/일봉에 대해서만 아래 코드가 효과가 있음.
-        if is_market_open():
-            print("ERROR: 장중에는 데이터 수집이 안됩니다.")
-            sys.exit()
 
         from_date = np.dtype(np.int64)
         for index, row in tqdm.tqdm(self.df_code_name_latest_db.iterrows(), total=self.df_code_name_latest_db.shape[0]): 
@@ -200,7 +205,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 gc.collect()
 
         self.update_status_msg = ''
-        self.get_df_latest_min_db()
+        self.connect_code_list_view()
 
     @decorators.return_status_msg_setter
     def update_price_db_day(self, tick_unit = '일봉'):
@@ -208,11 +213,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         columns=['open', 'high', 'low', 'close', 'volume'
                     , '시가총액', '외국인현보유수량', '기관순매수']
                     
-
         with sqlite3.connect(self.db_file_day) as con:
             cursor = con.cursor()
             for index, row in tqdm.tqdm(self.df_code_name_latest_db.iterrows(), total=self.df_code_name_latest_db.shape[0]): 
                 code = row['종목코드']
+                ret, ret7254 = self.objStockChart.Request_investors_supply(code, count, in_NumOrMoney = 1)
+                if ret == False : 
+                    print(' 7254 요청 실패')
+                print(ret7254)
+
                 if row['일봉 갱신날짜'] :
                     from_date = row['일봉 갱신날짜']
                 else : 
@@ -238,7 +247,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 gc.collect()
 
         self.update_status_msg = ''
-        self.get_df_latest_day_db()
+        self.connect_code_list_view()
 
     def timeout_1s(self):
         current_time = QTime.currentTime()
