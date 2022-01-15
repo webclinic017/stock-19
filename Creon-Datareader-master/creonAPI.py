@@ -3,6 +3,9 @@ import win32com.client
 import time
 
 g_objCpStatus = win32com.client.Dispatch('CpUtil.CpCybos')
+g_objCodeMgr =win32com.client.Dispatch('CpUtil.CpCodeMgr')
+# g_objCpTrade = win32com.client.Dispatch('CpUtil.CpTdUtil')
+g_objFutureMgr = win32com.client.Dispatch('CpUtil.CpFutureCode')
 
 
 # original_func 콜하기 전에 PLUS 연결 상태 체크하는 데코레이터
@@ -113,6 +116,66 @@ class CpStockChart:
         caller.rcv_data = rcv_data  # 받은 데이터를 caller의 멤버에 저장
         return True
 
+    def waitRqLimit(self, type):
+        remainCount = g_objCpStatus.GetLimitRemainCount(type)
+
+        if remainCount > 0 :
+            True
+
+        remainTime = g_objCpStatus.LimitRequestRemainTime
+        print('조회 제한 회피 time wait %.2f초 ' % (remainTime /1000.0))
+        time.sleep(remainTime/1000)
+        return True
+
+    def Request_investors_supply(self, code, rqCnt, in_NumOrMoney) :
+        rqCnt = 20000
+        self.objRq = win32com.client.Dispatch('CpSysDib.CpSvr7254')  
+
+        self.objRq.SetInputValue(0,code) # 종목코드
+        self.objRq.SetInputValue(1,6) # 일자별
+        self.objRq.SetInputValue(2,20180101) # 시작
+        self.objRq.SetInputValue(3,20180309) # 종료
+        self.objRq.SetInputValue(4,ord('0')) # 0 : 순매수 / 1 : 매매비중
+        self.objRq.SetInputValue(5,0) # 전체
+
+        self.objRq.SetInputValue(6,ord('1'))  # 1 : 순매수량 / 2 : 추정금액(백만)
+
+        ret7254 = []
+
+        while True:
+            self.waitRqLimit(1)
+            self.objRq.BlockRequest()
+            rqStatus = self.objRq.GetDibStatus()
+            if rqStatus != 0:
+                return (False, ret7254)
+
+            cnt = self.objRq.GetHeaderValue(1)
+
+            for i in range(cnt):
+                item = {}
+                fixed = self.objRq.GetDataValue(18,i)
+                #잠정치는 일단 버림
+                if (fixed == ord('0')):
+                    continue
+
+                item['거래량'] = self.objRq.GetDataValue(17,i)
+                item['일자'] = self.objRq.GetDataValue(0,i)
+                item['종가'] = self.objRq.GetDataValue(14,i)
+                item['개인'] = self.objRq.GetDataValue(1,i)
+                item['외국인'] = self.objRq.GetDataValue(2,i)
+                item['기관'] = self.objRq.GetDataValue(3,i)
+                item['대비율'] = self.objRq.GetDataValue(16,i)
+                ret7254.append(item)
+
+                if(len(ret7254) >=rqCnt):
+                    break
+            if self.objRq.Continue == False:
+                break
+            if (len(ret7254) >= rqCnt) :
+                break
+
+        return (True, ret7254)
+
     # 차트 요청 - 분간, 틱 차트
     @check_PLUS_status
     def RequestMT(self, code, dwm, tick_range, count, caller: 'MainWindow', from_date=0, ohlcv_only=True):
@@ -196,26 +259,8 @@ class CpStockChart:
         caller.rcv_data = rcv_data  # 받은 데이터를 caller의 멤버에 저장
         return True
 
-# 종목코드 관리하는 클래스
-class CpCodeMgr:
-    def __init__(self):
-        self.objCodeMgr = win32com.client.Dispatch("CpUtil.CpCodeMgr")
-
-    # 마켓에 해당하는 종목코드 리스트 반환하는 메소드
-    def get_code_list(self, market):
-        """
-        :param market: 1:코스피, 2:코스닥, ...
-        :return: market에 해당하는 코드 list
-        """
-        code_list = self.objCodeMgr.GetStockListByMarket(market)
-        return code_list
-
-    # 부구분코드를 반환하는 메소드
-    def get_section_code(self, code):
-        section_code = self.objCodeMgr.GetStockSectionKind(code)
-        return section_code
-
-    # 종목 코드를 받아 종목명을 반환하는 메소드
-    def get_code_name(self, code):
-        code_name = self.objCodeMgr.CodeToName(code)
-        return code_name
+objStockChart = CpStockChart()
+ret, ret7254 = objStockChart.Request_investors_supply("A000020", 20000 , in_NumOrMoney = 1)
+if ret == False : 
+    print(' 7254 요청 실패')
+print(ret7254)
