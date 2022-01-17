@@ -6,11 +6,9 @@ import pandas as pd
 import os
 import yfinance as yf
 import my_data_reader
+import argparse
 
 locale.setlocale(locale.LC_ALL, 'ko_KR')
-
-# Create a subclass of Strategy to define the indicators and logic
-
 
 class CustomStrategy(bt.Strategy):
     # list of parameters which are configurable for the strategy
@@ -113,12 +111,12 @@ class CustomStrategy(bt.Strategy):
             sum_factor = -1
 
         date = self.data.datetime.date()
-        stock_price = self.data.close[0]
+        stock_price = self.datas[1].close[0]
         cash = self.broker.getcash()
         value = self.broker.getvalue()
         self.holding += order.size
         self.sum_price += order.size * stock_price * sum_factor
-        avg_price = 0
+        avg_price = 0 
         if self.holding != 0 : 
             avg_price = self.sum_price / self.holding
         else : 
@@ -139,8 +137,10 @@ if __name__ == "__main__":
     # code = "306200.KS" # 세아제강
     # code = "207940.KS" # 삼성바이오로직스
     # ^KS11 코스피
-    kospi = bt.feeds.PandasData(dataname=yf.download('^KS11', '2020-01-01', '2022-12-31', auto_adjust=True))
-    data = bt.feeds.PandasData(dataname=yf.download(code, '2020-01-01', '2022-12-31', auto_adjust=True))
+    start_date =  '2018-01-01'
+    last_date =  '2018-12-31'
+    kospi = bt.feeds.PandasData(dataname=yf.download('^KS11',start_date,last_date, auto_adjust=True))
+    data = bt.feeds.PandasData(dataname=yf.download(code, start_date, last_date, auto_adjust=True))
 
     cerebro.adddata(kospi)  # Add the data feed
     cerebro.adddata(data)
@@ -151,12 +151,9 @@ if __name__ == "__main__":
     cerebro.run()  # run it all
     final_value = cerebro.broker.getvalue()
 
-    print('* 시작 평가잔액 : %s won' %
-          locale.format_string('%d', start_value, grouping=True))
-    print('* 종료 평가잔액 : %s won' %
-          locale.format_string('%d', final_value, grouping=True))
-    print('*    수익율     : %.2f %%' %
-          ((final_value - start_value) / start_value * 100.0))
-
+    print('* 시작 평가잔액 : %s won' % locale.format_string('%d', start_value, grouping=True))
+    print('* 종료 평가잔액 : %s won' % locale.format_string('%d', final_value, grouping=True))
+    print('*    수익율     : %.2f %%' % ((final_value - start_value) / start_value * 100.0))
+ 
     # and plot it with a single command
     cerebro.plot(style='candle', barup='red', bardown='blue')
