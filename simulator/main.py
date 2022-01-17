@@ -24,8 +24,10 @@ class CustomStrategy(bt.Strategy):
         envelope_period=30,
         perc=2.5,
         # 최대 보유 시간 
-        target_day=5,
-        extend_due_date=True,
+        target_day=10,
+        target_due_date=True,
+        # 익절 조건
+        target_rsi = 70,
         # 3단 비중 조절
         rsi_first_band=30,
         rsi_second_band=20,
@@ -49,47 +51,49 @@ class CustomStrategy(bt.Strategy):
         self.second_signal = False
         self.third_signal = False
 
-        self.signal_due_date = self.min_date()
+        self.signal_due_date = 0
 
     def min_date(self) :
         return datetime.date(1, 1, 1)
         
-    def no_signal_started(self) :
-        signal_started = self.first_signal and self.second_signal and self.third_signal
+    def signal_started(self) :
+        signal_started = self.first_signal or self.second_signal or self.third_signal
         return signal_started
 
     def next(self):
         # position 이 없을때
-        if self.signal_due_date < self.data.datetime.date() and self.rsi_sma < self.params.lowerband and self.envelope.bot > self.data.close :
+        if self.rsi_sma < self.params.lowerband and self.envelope.bot > self.data.close :
             # 10일 카운트 시작
-            if self.signal_due_date == self.min_date() :
-                self.signal_due_date = self.data.datetime.date() + datetime.timedelta(days=self.params.target_day)
+            if self.signal_due_date == 0:
+                self.signal_due_date = self.params.target_day
+            # RSI 조건별로 주문
             if self.rsi_sma < self.params.rsi_first_band  and self.first_signal == False:
-                self.order_target_percent(target=self.params.first_buy)
+                self.order_target_percent(target=self.params.first_buy, data=self.datas[1])
                 self.first_signal = True
             elif self.rsi_sma < self.params.rsi_second_band  and self.second_signal == False:
-                self.order_target_percent(target=self.params.second_buy)
-                if self.params.extend_due_date : self.signal_due_date = self.data.datetime.date() + datetime.timedelta(days=self.params.target_day)
+                self.order_target_percent(target=self.params.second_buy, data=self.datas[1])
+                if self.params.target_due_date : self.signal_due_date = self.params.target_day
                 self.second_signal = True
             elif self.rsi_sma < self.params.rsi_third_band  and self.third_signal == False:
-                self.order_target_percent(target=self.params.third_buy)
-                if self.params.extend_due_date : self.signal_due_date = self.data.datetime.date() + datetime.timedelta(days=self.params.target_day)
+                self.order_target_percent(target=self.params.third_buy, data=self.datas[1])
+                if self.params.target_due_date : self.signal_due_date = self.params.target_day
                 self.third_signal = True
 
         # 이미 position 이 있을때
-        elif self.position :
-            if self.signal_due_date == self.min_date() :
-                self.signal_due_date = datetime.min_date()
+        elif self.signal_started() :
+            self.signal_due_date -= 1
+            if self.signal_due_date <= 0:
+                self.signal_due_date = 0
                 self.third_signal = False
                 self.second_signal = False
                 self.first_signal = False
-                self.order_target_percent(target=0.0)
-            elif self.rsi_sma > 50 : 
-                self.signal_due_date = self.min_date()
+                self.order_target_percent(target=0.0, data=self.datas[1])
+            elif self.rsi_sma > self.params.target_rsi : 
+                self.signal_due_date = 0
                 self.third_signal = False
                 self.second_signal = False
                 self.first_signal = False
-                self.order_target_percent(target=0.0)
+                self.order_target_percent(target=0.0,data=self.datas[1])
 
     def isRedCandle(self):
         if self.data.close[0] > self.data.open[0]:
@@ -129,10 +133,14 @@ if __name__ == "__main__":
     cerebro.broker.setcommission(0.003)
 
     # data = bt.feeds.PandasData(dataname=my_data_reader.MyDataReader().get_data_with_time("A052400",20210101,20220101))
-    # 000660.KS 하이닉스 
+    code = "000660.KS" # 하이닉스 
+    # code = "052400.KQ" # 코나아이
+    # code = "005930.KS" # 삼성전자
+    # code = "306200.KS" # 세아제강
+    # code = "207940.KS" # 삼성바이오로직스
     # ^KS11 코스피
-    kospi = bt.feeds.PandasData(dataname=yf.download('^KS11', '2021-01-01', '2022-12-31', auto_adjust=True))
-    data = bt.feeds.PandasData(dataname=yf.download('000660.KS', '2021-01-01', '2022-12-31', auto_adjust=True))
+    kospi = bt.feeds.PandasData(dataname=yf.download('^KS11', '2020-01-01', '2022-12-31', auto_adjust=True))
+    data = bt.feeds.PandasData(dataname=yf.download(code, '2020-01-01', '2022-12-31', auto_adjust=True))
 
     cerebro.adddata(kospi)  # Add the data feed
     cerebro.adddata(data)
