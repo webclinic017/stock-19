@@ -4,6 +4,7 @@ amchart
 backtrader 
 - 기대 수익률 계산
 
+    data = bt.feeds.PandasData(dataname=yf.download('005930.KS', '2000-07-06', '2021-07-01', auto_adjust=True))
 https://community.backtrader.com/topic/3979/help-with-yahoofinance-data/2
 pip install yfinance
 
