@@ -1,6 +1,7 @@
 # coding=utf-8
 import win32com.client
 import time
+import csv
 
 g_objCpStatus = win32com.client.Dispatch('CpUtil.CpCybos')
 g_objCodeMgr =win32com.client.Dispatch('CpUtil.CpCodeMgr')
@@ -300,18 +301,19 @@ class CpCodeMgr:
         return allcodelist
 
 
-if __name__ == "__main__":
-    import csv
-    codes=CpCodeMgr().get_kospi200()
+def create_kospi_kosdaq_list_file():
+    codes=CpCodeMgr().get_kosdaq150()
 
-    dict ={}
-    with open('kospi200.list','w') as out:
-        # csv_out=csv.writer(out)
-        out.writelines("\n".join(codes))
+    with open('kosdaq150.list','w') as out:
+        for code in codes :
+            code = code.split("A")[1]+".KQ"
+            out.write(code+"\n")
         # for code in codes:
         #     name = g_objCodeMgr.CodeToName(code)
         #     dict[code] = name
 
         # for key in dict.keys():
         #     csv_out.writerow(dict[key])
-            
+
+if __name__ == "__main__":
+    create_kospi_kosdaq_list_file
