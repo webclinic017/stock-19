@@ -2,6 +2,7 @@
 import win32com.client
 import time
 import csv
+import pandas as pd
 
 g_objCpStatus = win32com.client.Dispatch('CpUtil.CpCybos')
 g_objCodeMgr =win32com.client.Dispatch('CpUtil.CpCodeMgr')
@@ -297,12 +298,38 @@ class CpCodeMgr:
         return allcodelist
 
 
-def create_kospi_kosdaq_list_file():
-    codes=CpCodeMgr().get_kosdaq150()
-    with open('kosdaq150.list','w') as out:
-        for code in codes :
-            code = code.split("A")[1]+".KQ"
-            out.write(code+"\n")
+def create_kosdaq150_kosdaq_list_file():
+    cpCodeMgr = CpCodeMgr()
+    codes=cpCodeMgr.get_kosdaq150()
+    dict = {}
+    # with open('kosdaq150.list','w') as out:
+    for code in codes :
+        name = cpCodeMgr.get_code_name(code)
+        # print()
+        code = code.split("A")[1]+".KQ"
+        dict[code] = name
+        # out.write(code+"\n")
+
+    code_list = pd.DataFrame(list(dict.items()),
+                                    columns=('종목코드', '회사명'))
+    code_list.to_csv("kosdaq150.csv")
+
+def create_kospi200_list_file():
+    cpCodeMgr = CpCodeMgr()
+    codes=cpCodeMgr.get_kospi200()
+    # with open('kospi200.list','w') as out:
+    dict = {}
+    for code in codes :
+        # print(cpCodeMgr.get_code_name(code))
+        name = cpCodeMgr.get_code_name(code)
+        code = code.split("A")[1]+".KS"
+        # out.write(code+"\n")
+        dict[code] = name
+    code_list = pd.DataFrame(list(dict.items()),
+                                    columns=('종목코드', '회사명'))
+    code_list.to_csv("kospi200.csv")
 
 if __name__ == "__main__":
-    create_kospi_kosdaq_list_file
+    create_kosdaq150_kosdaq_list_file()
+    create_kospi200_list_file()
+    

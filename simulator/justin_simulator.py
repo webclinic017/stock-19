@@ -47,7 +47,7 @@ class Worker(QThread):
 
     def calculate_yield(self, code):
         _yield = Simulator(cash=self.cash, commission=self.commission).simulate_each(code=code,
-            index_data=self.index_data, start_date=self.start_date, last_date=self.last_date, plot=False)
+            index_data=self.index_data, start_date=self.start_date, last_date=self.last_date, plot=self.plot)
         return _yield
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -115,7 +115,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ) + "-" + self.comboBox_last_month.currentText() + "-31"
 
         self.index_data = bt.feeds.PandasData(dataname=yf.download(
-            tickers=self.index, start_date=self.start_date, last_date=self.last_date, auto_adjust=True, progress=False))
+            tickers=self.index, start_date=self.start_date, last_date=self.last_date, auto_adjust=True, progress=True, threads=True))
 
         # self.tableWidget.setRowCount(len(self.filter_list))
 
@@ -151,15 +151,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     dict[code] = "코스피200"
 
         self.filter_list = pd.DataFrame(list(dict.items()),
-                                        columns=('종목코드', '사장구분'))
+                                        columns=('종목코드', '시장구분'))
 
         self.db_view_model = PandasModel(self.filter_list)
         self.tableView.setModel(self.db_view_model)
         self.tableView.resizeColumnToContents(0)
 
-
 app = QApplication
-
 
 def main_gui():
     global app

@@ -1,5 +1,6 @@
 import datetime
 import backtrader as bt
+from backtrader import plot
 import locale
 import sqlite3
 import pandas as pd
@@ -8,6 +9,7 @@ from pymysql import NULL
 import yfinance as yf
 import my_data_reader
 import argparse
+import time
 
 locale.setlocale(locale.LC_ALL, 'ko_KR')
 
@@ -152,10 +154,10 @@ class Simulator:
             index_data = bt.feeds.PandasData(dataname=yf.download(
                 index, start_date, last_date, auto_adjust=True,progress = False))
         data = bt.feeds.PandasData(dataname=yf.download(
-            tickers = code, start = start_date, end = last_date, auto_adjust=True,progress = False))
-
-        self.cerebro.adddata(index_data)  # Add the data feed
+            tickers = code, start = start_date, end = last_date, auto_adjust=True,progress = True, threads=True))
         self.cerebro.adddata(data)
+        self.cerebro.adddata(index_data)  # Add the data feed
+        
 
         self.cerebro.addstrategy(CustomStrategy)  # Add the trading strategy
 
@@ -176,9 +178,39 @@ class Simulator:
               (_yeild))
 
         # and plot it with a single command
+        
         if plot == True:
-            self.cerebro.plot(style='candle', barup='red', bardown='blue')
+
+            _yeild_str = str(round(_yeild,2)).replace(".","_")
+            filename = code + "_" + _yeild_str + "_" + start_date + "~" + last_date + ".png"
+
+
+            fig = self.cerebro.plot(width=1920, height=1080, dpi=1000,style='candle', barup='red', bardown='blue')[0][0]
+            fig.savefig(filename)
+
+            # print(data[datetime][-1])
+            # print(data[datetime][0])
+            # self.saveplots(self.cerebro,file_path = filename, style='candle', barup='red', bardown='blue') 
+
         return _yeild
+
+    def saveplots(self, cerebro, numfigs=1, iplot=True, start=None, end=None,
+                width=16, height=9, dpi=300, tight=True, use=None, file_path = '', **kwargs):
+
+            plotter = plot.Plot(**kwargs)
+
+            figs = []
+            for stratlist in cerebro.runstrats:
+                for si, strat in enumerate(stratlist):
+                    rfig = plotter.plot(strat, figid=si * 100,
+                                        numfigs=numfigs, iplot=iplot,
+                                        start=start, end=end, use=use)
+                    figs.append(rfig)
+
+            for fig in figs:
+                for f in fig:
+                    f.savefig(file_path, bbox_inches='tight')
+            return figs
 
 if __name__ == "__main__":
     Simulator().simulate_each()
