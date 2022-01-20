@@ -29,7 +29,7 @@
     <property name="flat">
      <bool>false</bool>
     </property>
-    <widget class="QGroupBox" name="groupBox_1">
+    <widget class="QGroupBox" name="groupBox_filter">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -41,39 +41,10 @@
      <property name="title">
       <string>종목 필터</string>
      </property>
-     <widget class="QCheckBox" name="checkbox_filter_kosdaq">
-      <property name="geometry">
-       <rect>
-        <x>200</x>
-        <y>30</y>
-        <width>101</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>코스닥</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="checkbox_filter_kospi">
-      <property name="geometry">
-       <rect>
-        <x>110</x>
-        <y>30</y>
-        <width>81</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>코스피</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
      <widget class="QLineEdit" name="lineEdit_1_2_1">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>110</x>
@@ -113,6 +84,9 @@
       </property>
      </widget>
      <widget class="QLineEdit" name="lineEdit_1_2_2">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>230</x>
@@ -139,6 +113,9 @@
       </property>
      </widget>
      <widget class="QLineEdit" name="lineEdit_1_3">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>110</x>
@@ -165,6 +142,9 @@
       </property>
      </widget>
      <widget class="QLineEdit" name="lineEdit_1_4_2">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>230</x>
@@ -178,6 +158,9 @@
       </property>
      </widget>
      <widget class="QLineEdit" name="lineEdit_1_4_1">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>110</x>
@@ -261,6 +244,9 @@
       </property>
      </widget>
      <widget class="QComboBox" name="comboBox1_1">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="geometry">
        <rect>
         <x>340</x>
@@ -303,8 +289,37 @@
        <string>이상</string>
       </property>
      </widget>
+     <widget class="QRadioButton" name="radioButton_kospi">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>30</y>
+        <width>90</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>코스피</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="radioButton_kosdaq">
+      <property name="geometry">
+       <rect>
+        <x>230</x>
+        <y>30</y>
+        <width>90</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>코스닥</string>
+      </property>
+     </widget>
     </widget>
-    <widget class="QGroupBox" name="groupBox_2">
+    <widget class="QGroupBox" name="groupBox_buy_condition">
      <property name="geometry">
       <rect>
        <x>470</x>
@@ -527,7 +542,7 @@
       </item>
      </widget>
     </widget>
-    <widget class="QGroupBox" name="groupBox_3">
+    <widget class="QGroupBox" name="groupBox_sell_condition">
      <property name="geometry">
       <rect>
        <x>980</x>
@@ -714,7 +729,7 @@
       </property>
      </widget>
     </widget>
-    <widget class="QGroupBox" name="groupBox_4">
+    <widget class="QGroupBox" name="groupBox_result">
      <property name="geometry">
       <rect>
        <x>1490</x>
@@ -755,7 +770,7 @@
       </attribute>
      </widget>
     </widget>
-    <widget class="QGroupBox" name="groupBox_6">
+    <widget class="QGroupBox" name="groupBox_simulation">
      <property name="geometry">
       <rect>
        <x>470</x>
@@ -767,39 +782,13 @@
      <property name="title">
       <string>시뮬레이션 실행</string>
      </property>
-     <widget class="QLabel" name="label_20">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>20</y>
-        <width>30</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>기간</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_1_2_3">
-      <property name="geometry">
-       <rect>
-        <x>210</x>
-        <y>20</y>
-        <width>10</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>~</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_2">
+     <widget class="QPushButton" name="pushButton_start_simulation">
       <property name="enabled">
        <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>
-        <x>401</x>
+        <x>891</x>
         <y>16</y>
         <width>106</width>
         <height>30</height>
@@ -809,10 +798,10 @@
        <string>시뮬레이션 시작</string>
       </property>
      </widget>
-     <widget class="QComboBox" name="comboBox_12">
+     <widget class="QComboBox" name="comboBox_start_year">
       <property name="geometry">
        <rect>
-        <x>310</x>
+        <x>560</x>
         <y>20</y>
         <width>50</width>
         <height>22</height>
@@ -820,29 +809,34 @@
       </property>
       <item>
        <property name="text">
-        <string>1월</string>
+        <string>2021</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>2000</string>
        </property>
       </item>
      </widget>
-     <widget class="QComboBox" name="comboBox_9">
+     <widget class="QComboBox" name="comboBox_start_month">
       <property name="geometry">
        <rect>
-        <x>70</x>
+        <x>640</x>
         <y>20</y>
-        <width>70</width>
+        <width>30</width>
         <height>22</height>
        </rect>
       </property>
       <item>
        <property name="text">
-        <string>2000년</string>
+        <string>1</string>
        </property>
       </item>
      </widget>
-     <widget class="QComboBox" name="comboBox_10">
+     <widget class="QComboBox" name="comboBox_last_year">
       <property name="geometry">
        <rect>
-        <x>150</x>
+        <x>720</x>
         <y>20</y>
         <width>50</width>
         <height>22</height>
@@ -850,24 +844,102 @@
       </property>
       <item>
        <property name="text">
-        <string>1월</string>
+        <string>2022</string>
        </property>
       </item>
      </widget>
-     <widget class="QComboBox" name="comboBox_11">
+     <widget class="QComboBox" name="comboBox_last_month">
       <property name="geometry">
        <rect>
-        <x>230</x>
+        <x>800</x>
         <y>20</y>
-        <width>70</width>
+        <width>30</width>
         <height>22</height>
        </rect>
       </property>
       <item>
        <property name="text">
-        <string>2020년</string>
+        <string>1</string>
        </property>
       </item>
+     </widget>
+     <widget class="QLabel" name="filter_1">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>20</y>
+        <width>81</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>시작 금액</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_start_cash">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>20</y>
+        <width>91</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>100000000</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_commission">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>20</y>
+        <width>40</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>0.3</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="filter_2">
+      <property name="geometry">
+       <rect>
+        <x>220</x>
+        <y>20</y>
+        <width>81</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>수수료율</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_21">
+      <property name="geometry">
+       <rect>
+        <x>350</x>
+        <y>20</y>
+        <width>10</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>%</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_22">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>10</y>
+        <width>361</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>기간                     년           월   ~                 년            월</string>
+      </property>
      </widget>
     </widget>
    </widget>
