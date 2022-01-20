@@ -294,26 +294,15 @@ class CpCodeMgr:
     
     def get_kosdaq150(self):
         allcodelist= g_objCodeMgr.GetGroupCodeList(390)
-        # print("\n---- 코스닥150 종목 -- 총갯수 : ", len(allcodelist))
-        # for code in allcodelist:
-        #     name = g_objCodeMgr.CodeToName(code)
-        #     print(name, code)
         return allcodelist
 
 
 def create_kospi_kosdaq_list_file():
     codes=CpCodeMgr().get_kosdaq150()
-
     with open('kosdaq150.list','w') as out:
         for code in codes :
             code = code.split("A")[1]+".KQ"
             out.write(code+"\n")
-        # for code in codes:
-        #     name = g_objCodeMgr.CodeToName(code)
-        #     dict[code] = name
-
-        # for key in dict.keys():
-        #     csv_out.writerow(dict[key])
 
 if __name__ == "__main__":
     create_kospi_kosdaq_list_file

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>2381</width>
-    <height>1161</height>
+    <width>1820</width>
+    <height>915</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,8 +19,8 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>2351</width>
-      <height>1101</height>
+      <width>2231</width>
+      <height>1040</height>
      </rect>
     </property>
     <property name="title">
@@ -34,17 +34,17 @@
       <rect>
        <x>10</x>
        <y>20</y>
-       <width>500</width>
-       <height>1071</height>
+       <width>450</width>
+       <height>1009</height>
       </rect>
      </property>
      <property name="title">
       <string>종목 필터</string>
      </property>
-     <widget class="QCheckBox" name="checkBox_1_1">
+     <widget class="QCheckBox" name="checkbox_filter_kosdaq">
       <property name="geometry">
        <rect>
-        <x>130</x>
+        <x>200</x>
         <y>30</y>
         <width>101</width>
         <height>16</height>
@@ -53,11 +53,14 @@
       <property name="text">
        <string>코스닥</string>
       </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
      </widget>
-     <widget class="QCheckBox" name="checkBox_1_2">
+     <widget class="QCheckBox" name="checkbox_filter_kospi">
       <property name="geometry">
        <rect>
-        <x>240</x>
+        <x>110</x>
         <y>30</y>
         <width>81</width>
         <height>16</height>
@@ -65,6 +68,9 @@
       </property>
       <property name="text">
        <string>코스피</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
       </property>
      </widget>
      <widget class="QLineEdit" name="lineEdit_1_2_1">
@@ -93,7 +99,7 @@
        <string>시장</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_1_1">
+     <widget class="QLabel" name="filter_">
       <property name="geometry">
        <rect>
         <x>30</x>
@@ -215,8 +221,8 @@
        <rect>
         <x>10</x>
         <y>480</y>
-        <width>481</width>
-        <height>581</height>
+        <width>430</width>
+        <height>350</height>
        </rect>
       </property>
       <attribute name="horizontalHeaderCascadingSectionResizes">
@@ -238,13 +244,13 @@
        <bool>true</bool>
       </attribute>
      </widget>
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QPushButton" name="pushButton_filter">
       <property name="enabled">
        <bool>true</bool>
       </property>
       <property name="geometry">
        <rect>
-        <x>380</x>
+        <x>330</x>
         <y>450</y>
         <width>106</width>
         <height>21</height>
@@ -301,10 +307,10 @@
     <widget class="QGroupBox" name="groupBox_2">
      <property name="geometry">
       <rect>
-       <x>520</x>
-       <y>59</y>
+       <x>470</x>
+       <y>81</y>
        <width>500</width>
-       <height>1031</height>
+       <height>970</height>
       </rect>
      </property>
      <property name="title">
@@ -329,7 +335,7 @@
         <x>10</x>
         <y>480</y>
         <width>481</width>
-        <height>581</height>
+        <height>290</height>
        </rect>
       </property>
       <attribute name="horizontalHeaderCascadingSectionResizes">
@@ -524,10 +530,10 @@
     <widget class="QGroupBox" name="groupBox_3">
      <property name="geometry">
       <rect>
-       <x>1030</x>
-       <y>60</y>
+       <x>980</x>
+       <y>80</y>
        <width>500</width>
-       <height>1031</height>
+       <height>871</height>
       </rect>
      </property>
      <property name="title">
@@ -539,7 +545,7 @@
         <x>10</x>
         <y>480</y>
         <width>481</width>
-        <height>581</height>
+        <height>290</height>
        </rect>
       </property>
       <attribute name="horizontalHeaderCascadingSectionResizes">
@@ -711,10 +717,10 @@
     <widget class="QGroupBox" name="groupBox_4">
      <property name="geometry">
       <rect>
-       <x>1550</x>
+       <x>1490</x>
        <y>20</y>
-       <width>781</width>
-       <height>1071</height>
+       <width>310</width>
+       <height>840</height>
       </rect>
      </property>
      <property name="title">
@@ -725,8 +731,8 @@
        <rect>
         <x>10</x>
         <y>69</y>
-        <width>760</width>
-        <height>991</height>
+        <width>290</width>
+        <height>760</height>
        </rect>
       </property>
       <attribute name="horizontalHeaderCascadingSectionResizes">
@@ -749,107 +755,120 @@
       </attribute>
      </widget>
     </widget>
-    <widget class="QComboBox" name="comboBox_10">
+    <widget class="QGroupBox" name="groupBox_6">
      <property name="geometry">
       <rect>
-       <x>1169</x>
-       <y>24</y>
-       <width>50</width>
-       <height>22</height>
+       <x>470</x>
+       <y>21</y>
+       <width>1011</width>
+       <height>50</height>
       </rect>
      </property>
-     <item>
-      <property name="text">
-       <string>1월</string>
+     <property name="title">
+      <string>시뮬레이션 실행</string>
+     </property>
+     <widget class="QLabel" name="label_20">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>20</y>
+        <width>30</width>
+        <height>21</height>
+       </rect>
       </property>
-     </item>
-    </widget>
-    <widget class="QComboBox" name="comboBox_9">
-     <property name="geometry">
-      <rect>
-       <x>1089</x>
-       <y>24</y>
-       <width>70</width>
-       <height>22</height>
-      </rect>
-     </property>
-     <item>
       <property name="text">
-       <string>2000년</string>
+       <string>기간</string>
       </property>
-     </item>
-    </widget>
-    <widget class="QComboBox" name="comboBox_11">
-     <property name="geometry">
-      <rect>
-       <x>1249</x>
-       <y>24</y>
-       <width>70</width>
-       <height>22</height>
-      </rect>
-     </property>
-     <item>
+     </widget>
+     <widget class="QLabel" name="label_1_2_3">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>20</y>
+        <width>10</width>
+        <height>21</height>
+       </rect>
+      </property>
       <property name="text">
-       <string>2020년</string>
+       <string>~</string>
       </property>
-     </item>
-    </widget>
-    <widget class="QComboBox" name="comboBox_12">
-     <property name="geometry">
-      <rect>
-       <x>1329</x>
-       <y>24</y>
-       <width>50</width>
-       <height>22</height>
-      </rect>
-     </property>
-     <item>
+     </widget>
+     <widget class="QPushButton" name="pushButton_2">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>401</x>
+        <y>16</y>
+        <width>106</width>
+        <height>30</height>
+       </rect>
+      </property>
       <property name="text">
-       <string>1월</string>
+       <string>시뮬레이션 시작</string>
       </property>
-     </item>
-    </widget>
-    <widget class="QPushButton" name="pushButton_2">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>1420</x>
-       <y>20</y>
-       <width>106</width>
-       <height>30</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>시뮬레이션 시작</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_20">
-     <property name="geometry">
-      <rect>
-       <x>1039</x>
-       <y>24</y>
-       <width>30</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>기간</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_1_2_3">
-     <property name="geometry">
-      <rect>
-       <x>1229</x>
-       <y>24</y>
-       <width>10</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>~</string>
-     </property>
+     </widget>
+     <widget class="QComboBox" name="comboBox_12">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>20</y>
+        <width>50</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>1월</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QComboBox" name="comboBox_9">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>20</y>
+        <width>70</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>2000년</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QComboBox" name="comboBox_10">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>20</y>
+        <width>50</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>1월</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QComboBox" name="comboBox_11">
+      <property name="geometry">
+       <rect>
+        <x>230</x>
+        <y>20</y>
+        <width>70</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>2020년</string>
+       </property>
+      </item>
+     </widget>
     </widget>
    </widget>
   </widget>
@@ -858,7 +877,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>2381</width>
+     <width>1820</width>
      <height>21</height>
     </rect>
    </property>

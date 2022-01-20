@@ -32,7 +32,7 @@ class CustomStrategy(bt.Strategy):
         rsi_third_band=10,
         first_buy=0.3,
         second_buy=0.6,
-        third_buy=0.95,
+        third_buy=0.95, 
     )
 
     def __init__(self):
