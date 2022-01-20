@@ -4,9 +4,10 @@ import time
 
 g_objCpStatus = win32com.client.Dispatch('CpUtil.CpCybos')
 g_objCodeMgr =win32com.client.Dispatch('CpUtil.CpCodeMgr')
-# g_objCpTrade = win32com.client.Dispatch('CpUtil.CpTdUtil')
 g_objFutureMgr = win32com.client.Dispatch('CpUtil.CpFutureCode')
-
+g_objStockChart = win32com.client.Dispatch("CpSysDib.StockChart")
+g_objCpSvr7254 = win32com.client.Dispatch('CpSysDib.CpSvr7254')  
+# g_objCpTrade = win32com.client.Dispatch('CpUtil.CpTdUtil')
 
 # original_func 콜하기 전에 PLUS 연결 상태 체크하는 데코레이터
 def check_PLUS_status(original_func):
@@ -26,15 +27,15 @@ def check_PLUS_status(original_func):
 class CpStockChart:
     def __init__(self):
         self.INTERVAL_TIME = 0.25
-        self.objStockChart = win32com.client.Dispatch("CpSysDib.StockChart")
+        
 
     def _check_rq_status(self):
         """
-        self.objStockChart.BlockRequest() 로 요청한 후 이 메소드로 통신상태 검사해야함
+        g_objStockChart.BlockRequest() 로 요청한 후 이 메소드로 통신상태 검사해야함
         :return: None
         """
-        rqStatus = self.objStockChart.GetDibStatus()
-        rqRet = self.objStockChart.GetDibMsg1()
+        rqStatus = g_objStockChart.GetDibStatus()
+        rqRet = g_objStockChart.GetDibMsg1()
         if rqStatus == 0:
             pass
             # print("통신상태 정상[{}]{}".format(rqStatus, rqRet), end=' ')
@@ -52,16 +53,16 @@ class CpStockChart:
         :param caller: 이 메소드 호출한 인스턴스. 결과 데이터를 caller의 멤버로 전달하기 위함
         :return: None
         """
-        self.objStockChart.SetInputValue(0, code)  # 종목코드
-        self.objStockChart.SetInputValue(1, ord('2'))  # 개수로 받기
-        self.objStockChart.SetInputValue(4, count)  # 최근 count개
+        g_objStockChart.SetInputValue(0, code)  # 종목코드
+        g_objStockChart.SetInputValue(1, ord('2'))  # 개수로 받기
+        g_objStockChart.SetInputValue(4, count)  # 최근 count개
 
         if ohlcv_only:
-            self.objStockChart.SetInputValue(5, [0, 2, 3, 4, 5, 8])  # 요청항목 - 날짜,시가,고가,저가,종가,거래량
+            g_objStockChart.SetInputValue(5, [0, 2, 3, 4, 5, 8])  # 요청항목 - 날짜,시가,고가,저가,종가,거래량
             rq_column = ('date', 'open', 'high', 'low', 'close', 'volume')
         else:
             # 요청항목
-            self.objStockChart.SetInputValue(5, [0, # 날짜
+            g_objStockChart.SetInputValue(5, [0, # 날짜
                                                 2, # 시가
                                                 3, # 고가
                                                 4, # 저가
@@ -75,8 +76,8 @@ class CpStockChart:
             rq_column = ('date', 'open', 'high', 'low', 'close', 'volume', 
                          '시가총액', '외국인현보유수량', '기관순매수')
 
-        self.objStockChart.SetInputValue(6, dwm)  # '차트 주기 - 일/주/월
-        self.objStockChart.SetInputValue(9, ord('1'))  # 수정주가 사용
+        g_objStockChart.SetInputValue(6, dwm)  # '차트 주기 - 일/주/월
+        g_objStockChart.SetInputValue(9, ord('1'))  # 수정주가 사용
 
         rcv_data = {}
         for col in rq_column:
@@ -84,15 +85,15 @@ class CpStockChart:
 
         rcv_count = 0
         while count > rcv_count:
-            self.objStockChart.BlockRequest()  # 요청! 후 응답 대기
+            g_objStockChart.BlockRequest()  # 요청! 후 응답 대기
             self._check_rq_status()  # 통신상태 검사
             time.sleep(self.INTERVAL_TIME)  # 시간당 RQ 제한으로 인해 장애가 발생하지 않도록 딜레이를 줌
 
-            rcv_batch_len = self.objStockChart.GetHeaderValue(3)  # 받아온 데이터 개수
+            rcv_batch_len = g_objStockChart.GetHeaderValue(3)  # 받아온 데이터 개수
             rcv_batch_len = min(rcv_batch_len, count - rcv_count)  # 정확히 count 개수만큼 받기 위함
             for i in range(rcv_batch_len):
                 for col_idx, col in enumerate(rq_column):
-                    rcv_data[col].append(self.objStockChart.GetDataValue(col_idx, i))
+                    rcv_data[col].append(g_objStockChart.GetDataValue(col_idx, i))
 
             if len(rcv_data['date']) == 0:  # 데이터가 없는 경우
                 print(code, '데이터 없음')
@@ -105,10 +106,10 @@ class CpStockChart:
             caller.return_status_msg = '{} / {}'.format(rcv_count, count)
 
             # 서버가 가진 모든 데이터를 요청한 경우 break.
-            # self.objStockChart.Continue 는 개수로 요청한 경우
+            # g_objStockChart.Continue 는 개수로 요청한 경우
             # count만큼 이미 다 받았더라도 계속 1의 값을 가지고 있어서
             # while 조건문에서 count > rcv_count를 체크해줘야 함.
-            if not self.objStockChart.Continue:
+            if not g_objStockChart.Continue:
                 break
             if rcv_oldest_date < from_date:
                 break
@@ -129,47 +130,46 @@ class CpStockChart:
 
     def Request_investors_supply(self, code, rqCnt, in_NumOrMoney) :
         rqCnt = 20000
-        self.objRq = win32com.client.Dispatch('CpSysDib.CpSvr7254')  
 
-        self.objRq.SetInputValue(0,code) # 종목코드
-        self.objRq.SetInputValue(1,6) # 일자별
-        self.objRq.SetInputValue(2,20180101) # 시작
-        self.objRq.SetInputValue(3,20180309) # 종료
-        self.objRq.SetInputValue(4,ord('0')) # 0 : 순매수 / 1 : 매매비중
-        self.objRq.SetInputValue(5,0) # 전체
+        g_objCpSvr7254.SetInputValue(0,code) # 종목코드
+        g_objCpSvr7254.SetInputValue(1,6) # 일자별
+        g_objCpSvr7254.SetInputValue(2,20180101) # 시작
+        g_objCpSvr7254.SetInputValue(3,20180309) # 종료
+        g_objCpSvr7254.SetInputValue(4,ord('0')) # 0 : 순매수 / 1 : 매매비중
+        g_objCpSvr7254.SetInputValue(5,0) # 전체
 
-        self.objRq.SetInputValue(6,ord('1'))  # 1 : 순매수량 / 2 : 추정금액(백만)
+        g_objCpSvr7254.SetInputValue(6,ord('1'))  # 1 : 순매수량 / 2 : 추정금액(백만)
 
         ret7254 = []
 
         while True:
             self.waitRqLimit(1)
-            self.objRq.BlockRequest()
-            rqStatus = self.objRq.GetDibStatus()
+            g_objCpSvr7254.BlockRequest()
+            rqStatus = g_objCpSvr7254.GetDibStatus()
             if rqStatus != 0:
                 return (False, ret7254)
 
-            cnt = self.objRq.GetHeaderValue(1)
+            cnt = g_objCpSvr7254.GetHeaderValue(1)
 
             for i in range(cnt):
                 item = {}
-                fixed = self.objRq.GetDataValue(18,i)
+                fixed = g_objCpSvr7254.GetDataValue(18,i)
                 #잠정치는 일단 버림
                 if (fixed == ord('0')):
                     continue
 
-                item['거래량'] = self.objRq.GetDataValue(17,i)
-                item['일자'] = self.objRq.GetDataValue(0,i)
-                item['종가'] = self.objRq.GetDataValue(14,i)
-                item['개인'] = self.objRq.GetDataValue(1,i)
-                item['외국인'] = self.objRq.GetDataValue(2,i)
-                item['기관'] = self.objRq.GetDataValue(3,i)
-                item['대비율'] = self.objRq.GetDataValue(16,i)
+                item['거래량'] = g_objCpSvr7254.GetDataValue(17,i)
+                item['일자'] = g_objCpSvr7254.GetDataValue(0,i)
+                item['종가'] = g_objCpSvr7254.GetDataValue(14,i)
+                item['개인'] = g_objCpSvr7254.GetDataValue(1,i)
+                item['외국인'] = g_objCpSvr7254.GetDataValue(2,i)
+                item['기관'] = g_objCpSvr7254.GetDataValue(3,i)
+                item['대비율'] = g_objCpSvr7254.GetDataValue(16,i)
                 ret7254.append(item)
 
                 if(len(ret7254) >=rqCnt):
                     break
-            if self.objRq.Continue == False:
+            if g_objCpSvr7254.Continue == False:
                 break
             if (len(ret7254) >= rqCnt) :
                 break
@@ -187,15 +187,15 @@ class CpStockChart:
         :param caller: 이 메소드 호출한 인스턴스. 결과 데이터를 caller의 멤버로 전달하기 위함
         :return:
         """
-        self.objStockChart.SetInputValue(0, code)  # 종목코드
-        self.objStockChart.SetInputValue(1, ord('2'))  # 개수로 받기
-        self.objStockChart.SetInputValue(4, count)  # 조회 개수
+        g_objStockChart.SetInputValue(0, code)  # 종목코드
+        g_objStockChart.SetInputValue(1, ord('2'))  # 개수로 받기
+        g_objStockChart.SetInputValue(4, count)  # 조회 개수
         if ohlcv_only:
-            self.objStockChart.SetInputValue(5, [0, 1, 2, 3, 4, 5, 8])  # 요청항목 - 날짜, 시간,시가,고가,저가,종가,거래량
+            g_objStockChart.SetInputValue(5, [0, 1, 2, 3, 4, 5, 8])  # 요청항목 - 날짜, 시간,시가,고가,저가,종가,거래량
             rq_column = ('date', 'time', 'open', 'high', 'low', 'close', 'volume')
         else:
             # 요청항목
-            self.objStockChart.SetInputValue(5, [0, # 날짜
+            g_objStockChart.SetInputValue(5, [0, # 날짜
                                                 1, # 시간
                                                 2, # 시가
                                                 3, # 고가
@@ -213,9 +213,9 @@ class CpStockChart:
             rq_column = ('date', 'time', 'open', 'high', 'low', 'close', 'volume', 
                          '시가총액', '외국인주문한도수량', '외국인현보유수량', '외국인현보유비율', '기관순매수', '기관누적순매수')
 
-        self.objStockChart.SetInputValue(6, dwm)  # '차트 주기 - 분/틱
-        self.objStockChart.SetInputValue(7, tick_range)  # 분틱차트 주기
-        self.objStockChart.SetInputValue(9, ord('1'))  # 수정주가 사용
+        g_objStockChart.SetInputValue(6, dwm)  # '차트 주기 - 분/틱
+        g_objStockChart.SetInputValue(7, tick_range)  # 분틱차트 주기
+        g_objStockChart.SetInputValue(9, ord('1'))  # 수정주가 사용
 
         rcv_data = {}
         for col in rq_column:
@@ -223,15 +223,15 @@ class CpStockChart:
 
         rcv_count = 0
         while count > rcv_count:
-            self.objStockChart.BlockRequest()  # 요청! 후 응답 대기
+            g_objStockChart.BlockRequest()  # 요청! 후 응답 대기
             self._check_rq_status()  # 통신상태 검사
             time.sleep(self.INTERVAL_TIME)  # 시간당 RQ 제한으로 인해 장애가 발생하지 않도록 딜레이를 줌
 
-            rcv_batch_len = self.objStockChart.GetHeaderValue(3)  # 받아온 데이터 개수
+            rcv_batch_len = g_objStockChart.GetHeaderValue(3)  # 받아온 데이터 개수
             rcv_batch_len = min(rcv_batch_len, count - rcv_count)  # 정확히 count 개수만큼 받기 위함
             for i in range(rcv_batch_len):
                 for col_idx, col in enumerate(rq_column):
-                    rcv_data[col].append(self.objStockChart.GetDataValue(col_idx, i))
+                    rcv_data[col].append(g_objStockChart.GetDataValue(col_idx, i))
 
             if len(rcv_data['date']) == 0:  # 데이터가 없는 경우
                 print(code, '데이터 없음')
@@ -244,10 +244,10 @@ class CpStockChart:
             caller.return_status_msg = '{} / {}(maximum)'.format(rcv_count, count)
 
             # 서버가 가진 모든 데이터를 요청한 경우 break.
-            # self.objStockChart.Continue 는 개수로 요청한 경우
+            # g_objStockChart.Continue 는 개수로 요청한 경우
             # count만큼 이미 다 받았더라도 계속 1의 값을 가지고 있어서
             # while 조건문에서 count > rcv_count를 체크해줘야 함.
-            if not self.objStockChart.Continue:
+            if not g_objStockChart.Continue:
                 break
             if rcv_oldest_date < from_date:
                 break
@@ -262,7 +262,7 @@ class CpStockChart:
 # 종목코드 관리하는 클래스
 class CpCodeMgr:
     def __init__(self):
-        self.objCodeMgr = win32com.client.Dispatch("CpUtil.CpCodeMgr")
+        print("CpCodeMgr __init__")
 
     # 마켓에 해당하는 종목코드 리스트 반환하는 메소드
     def get_code_list(self, market):
@@ -270,21 +270,48 @@ class CpCodeMgr:
         :param market: 1:코스피, 2:코스닥, ...
         :return: market에 해당하는 코드 list
         """
-        code_list = self.objCodeMgr.GetStockListByMarket(market)
+        code_list = g_objCodeMgr.GetStockListByMarket(market)
         return code_list
 
     # 부구분코드를 반환하는 메소드
     def get_section_code(self, code):
-        section_code = self.objCodeMgr.GetStockSectionKind(code)
+        section_code = g_objCodeMgr.GetStockSectionKind(code)
         return section_code
 
     # 종목 코드를 받아 종목명을 반환하는 메소드
     def get_code_name(self, code):
-        code_name = self.objCodeMgr.CodeToName(code)
+        code_name = g_objCodeMgr.CodeToName(code)
         return code_name
 
-# objStockChart = CpStockChart()
-# ret, ret7254 = objStockChart.Request_investors_supply("A000020", 20000 , in_NumOrMoney = 1)
-# if ret == False : 
-#     print(' 7254 요청 실패')
-# print(ret7254)
+    def get_kospi200(self):
+        allcodelist= g_objCodeMgr.GetGroupCodeList(180)
+        return allcodelist
+    
+    def is_kospi200(self,code):
+        allcodelist= g_objCodeMgr.GetStockKospi200Kind(code)
+        return allcodelist
+    
+    def get_kosdaq150(self):
+        allcodelist= g_objCodeMgr.GetGroupCodeList(390)
+        # print("\n---- 코스닥150 종목 -- 총갯수 : ", len(allcodelist))
+        # for code in allcodelist:
+        #     name = g_objCodeMgr.CodeToName(code)
+        #     print(name, code)
+        return allcodelist
+
+
+if __name__ == "__main__":
+    import csv
+    codes=CpCodeMgr().get_kospi200()
+
+    dict ={}
+    with open('kospi200.list','w') as out:
+        # csv_out=csv.writer(out)
+        out.writelines("\n".join(codes))
+        # for code in codes:
+        #     name = g_objCodeMgr.CodeToName(code)
+        #     dict[code] = name
+
+        # for key in dict.keys():
+        #     csv_out.writerow(dict[key])
+            
