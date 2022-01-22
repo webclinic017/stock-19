@@ -309,8 +309,8 @@ def create_index_list_file(index_kind):
     for code in codes :
         name = cpCodeMgr.get_code_name(code)
         ycode = code.split("A")[1]+ycode_postfix
-        dict[code] = ycode, name
-    code_list = pd.DataFrame.from_dict(dict, orient='index', columns=('야후코드' ,'회사명'))
+        dict[code] = ycode, name, index_kind
+    code_list = pd.DataFrame.from_dict(dict, orient='index', columns=('야후코드' ,'회사명',"시장구분"))
     code_list.index.name="종목코드"
     code_list.to_csv(index_kind+".csv",encoding='utf-8-sig')
 
