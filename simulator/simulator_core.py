@@ -10,10 +10,12 @@ import yfinance as yf
 import my_data_reader
 import argparse
 import time
-
+import threading
 locale.setlocale(locale.LC_ALL, 'ko_KR')
 
 DEBUG = True
+
+lock = threading.Lock() # threading에서 Lock 함수 가져오기
 
 class CustomStrategy(bt.Strategy):
     # list of parameters which are configurable for the strategy
@@ -129,7 +131,6 @@ class CustomStrategy(bt.Strategy):
 
 
 class Simulator:
-
     def __init__(self, cash=100000000, commission=0.3):
         # self.cerebro = bt.Cerebro()  # create a "Cerebro" engine instance
         self.cerebro = bt.Cerebro()  # create a "Cerebro" engine instance
@@ -153,8 +154,11 @@ class Simulator:
         if index_data is NULL:
             index_data = bt.feeds.PandasData(dataname=yf.download(
                 index, start_date, last_date, auto_adjust=True,progress = False))
+                
+        lock.acquire()
         data = bt.feeds.PandasData(dataname=yf.download(
-            tickers = code, start = start_date, end = last_date, auto_adjust=True,progress = True, threads=True))
+            tickers = code, start = start_date, end = last_date, auto_adjust=True,progress = True, threads=False))
+        lock.release()
         self.cerebro.adddata(data)
         self.cerebro.adddata(index_data)  # Add the data feed
         

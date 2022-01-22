@@ -28,7 +28,7 @@ Ui_MainWindow = uic.loadUiType("justin_simulator.ui")[0]
 class Worker(QThread):
     finished = pyqtSignal(dict)
 
-    def __init__(self, codes_dataframe, cash, commission, start_date, last_date, plot, index_data, core_num = 8):
+    def __init__(self, codes_dataframe, cash, commission, start_date, last_date, plot, index_data, core_num = 1):
         super().__init__()
         self.core_num = core_num
         self.filter_list = codes_dataframe
@@ -115,7 +115,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ) + "-" + self.comboBox_last_month.currentText() + "-31"
 
         self.index_data = bt.feeds.PandasData(dataname=yf.download(
-            tickers=self.index, start_date=self.start_date, last_date=self.last_date, auto_adjust=True, progress=True, threads=True))
+            tickers=self.index, start_date=self.start_date, last_date=self.last_date, auto_adjust=True, progress=True, threads=False))
 
         # self.tableWidget.setRowCount(len(self.filter_list))
 
