@@ -183,8 +183,10 @@ class Simulator:
         # and plot it with a single command
         
         if plot == True:
+            import os
+            if os.path.exists("png") is False: os.mkdir("png")
             _yeild_str = str(round(_yeild,2)).replace(".","_")
-            filename = code + "_(" + _yeild_str + ")_" + start_date + "~" + last_date + ".png"
+            filename = "png/"+ code + "_(" + _yeild_str + ")_" + start_date + "~" + last_date + ".png"
 
             # self.cerebro.plot(style='candle', barup='red', bardown='blue')
             # fig.savefig(filename)

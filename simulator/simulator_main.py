@@ -19,6 +19,7 @@ import math
 import time
 from multiprocessing.dummy import Pool as ThreadPool
 import sys
+from PIL import Image
 
 # .ui 파일에서 직접 클래스 생성하는 경우 주석 해제
 Ui_MainWindow = uic.loadUiType("justin_simulator.ui")[0]
@@ -84,6 +85,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.disable_all_children(self.groupBox_simulation)
         self.myDataReader= my_data_reader.MyDataReader()
         self.center()
+
+        self.tableView_result.clicked.connect(self.tableView_result_clicked)
+
+    def tableView_result_clicked(self,item) :
+        cellContent = item.data()
+        print(cellContent)  # test
+        sf = "You clicked on {}".format(cellContent)
+        print(sf)
+        if "png" in cellContent : 
+            image = Image.open(cellContent)
+            image.show()
+        
 
     def center(self):
         qr = self.frameGeometry()
@@ -168,17 +181,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         start = time.time()
         total = self.filter_list.shape[0]
-        i = 0
+        # i = 0
+        result_dict = {}
         for index, row in self.filter_list.iterrows() : 
             code = row['종목코드']
             result,filename = self.calculate_yield(code)
             self.update_status_msg = str(index) + " / " + str(total)
-            row['수익율'] = result
-            row['파일명'] = filename
-            i = i+1;
-            if i == 10 : break
-            
-        print(self.filter_list)
+            result_dict[code] = row['회사명'], round(result,2), filename
+            if self.checkBox_test.isChecked() : 
+                break
+            # i = i+1
+            # if i == 3 : break
+
+        result_dataframe = pd.DataFrame.from_dict(result_dict, orient='index', columns=('종목명' ,'수익율',"파일명"))
+        result_dataframe.index.name="종목코드"
+        result_dataframe.to_csv("result.csv",encoding='utf-8-sig')
+        result_dataframe = pd.read_csv("result.csv")
+        self.db_view_model = PandasModel(result_dataframe)
+        self.tableView_result.setModel(self.db_view_model)
+        self.tableView_result.resizeColumnToContents(0)
 
         end = time.time() 
         print("Total Simulation time : {end - start:.2f} sec", end - start)

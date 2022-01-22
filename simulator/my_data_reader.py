@@ -6,11 +6,16 @@ import os
 class MyDataReader:
     def __init__(self):
         # print(os.getcwd())
-        self.datapath = ('../Creon-Datareader-master/db/일봉/일봉_전종목.db')
-        if os.path.exists(self.datapath):
-            print("DB file is OK! ("+self.datapath+")")
-        else:
-            print(self.datapath + " in not exist!")
+        self.datapath = ('./db/일봉/일봉_전종목.db')
+        try:
+            if os.path.exists(self.datapath):
+                print("DB file is OK! ("+self.datapath+")")
+            else:
+                self.datapath = ('../Creon-Datareader-master/db/일봉/일봉_전종목.db')        
+                print("DB file is OK! ("+self.datapath+")")
+        except:
+            print("DB file is not exist!!!")
+            exit(1)
 
     # code = "D0011025" # 코나아이
     # code = "A052400 # 코나아이
