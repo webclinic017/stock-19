@@ -41,13 +41,12 @@ class Worker(QThread):
 
     def run(self):
         pool = ThreadPool(self.core_num) 
-        results = pool.map(self.calculate_yield, self.filter_list['종목코드'])
+        results = pool.map(self.calculate_yield,self.filter_list['종목코드'] )
         print(results)
-        # self.finished.emit(data)
 
     def calculate_yield(self, code):
         _yield = Simulator(cash=self.cash, commission=self.commission).simulate_each(code=code,
-            index_data=self.index_data, start_date=self.start_date, last_date=self.last_date, plot=self.plot)
+            index_data=self.index_data, start_date=self.start_date, last_date=self.last_date, plot=self.plot, db="MyDataReader")
         return _yield
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -122,15 +121,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.worker = Worker(codes_dataframe = self.filter_list, commission=self.commission, cash=self.cash,
                              index_data=self.index_data, start_date=self.start_date, last_date=self.last_date, core_num = 1, plot=False)
         self.worker.start()
-
-    # def simulate_each(self, code):
-
-    #     # called by each thread
-    #     def get_web_data(url):
-    #         return {'col1': 'something', 'request_data': requests.get(url).text}
-
-    #     urls = ["http://google.com", "http://yahoo.com"]
-    #     results = pool.map(get_web_data, urls)
 
     def filter_start(self):
         self.enable_all_children(self.groupBox_buy_condition)

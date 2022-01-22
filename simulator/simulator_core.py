@@ -137,9 +137,7 @@ class Simulator:
         self.cerebro.broker.setcash(cash)
         self.cerebro.broker.setcommission(commission/100)
 
-    def simulate_each(self, code="000660.KS", index_data=NULL, index='^KQ11', start_date='2018-01-01', last_date='2018-12-31', plot=True):
-        # data = bt.feeds.PandasData(dataname=my_data_reader.MyDataReader().get_data_with_time("A052400",20210101,20220101))
-
+    def simulate_each(self, code="A052400", index_data=NULL, index='^KQ11', start_date='2020-12-01', last_date='2022-01-01', plot=True, db="MyDataReader"):
         # code = "000660.KS"  # 하이닉스
         # code = "005930.KS" # 삼성전자
         # code = "306200.KS" # 세아제강
@@ -154,15 +152,20 @@ class Simulator:
         if index_data is NULL:
             index_data = bt.feeds.PandasData(dataname=yf.download(
                 index, start_date, last_date, auto_adjust=True,progress = False))
-                
-        lock.acquire()
-        data = bt.feeds.PandasData(dataname=yf.download(
-            tickers = code, start = start_date, end = last_date, auto_adjust=True,progress = True, threads=False))
-        lock.release()
-        self.cerebro.adddata(data)
-        self.cerebro.adddata(index_data)  # Add the data feed
-        
 
+        if db in "MyDataReader" : 
+            int_start_date = int(start_date.replace("-",""))
+            int_last_date = int(start_date.replace("-",""))
+            data = bt.feeds.PandasData(dataname=my_data_reader.MyDataReader().get_data_with_time(
+                code=code, start_date=int_start_date, last_date=int_last_date))
+        else : 
+            lock.acquire()
+            data = bt.feeds.PandasData(dataname=yf.download(tickers = code, start = start_date, end = last_date, auto_adjust=True,progress = True, threads=False))
+            lock.release()
+            
+        self.cerebro.adddata(index_data)  # Add the data feed
+        self.cerebro.adddata(data)
+        
         self.cerebro.addstrategy(CustomStrategy)  # Add the trading strategy
 
         start_value = self.cerebro.broker.getvalue()
@@ -170,28 +173,20 @@ class Simulator:
         final_value = self.cerebro.broker.getvalue()
         if DEBUG:
             print(code)
-        if DEBUG:
-            print('* 시작 평가잔액 : %s won' %
-                  locale.format_string('%d', start_value, grouping=True))
-        if DEBUG:
-            print('* 종료 평가잔액 : %s won' %
-                  locale.format_string('%d', final_value, grouping=True))
+            print('* 시작 평가잔액 : %s won' % locale.format_string('%d', start_value, grouping=True))
+            print('* 종료 평가잔액 : %s won' % locale.format_string('%d', final_value, grouping=True))
         
         _yeild = (final_value - start_value) / start_value * 100.0
-        print('*    수익율     : %.2f %%' %
-              (_yeild))
+        print('*    수익율     : %.2f %%' % (_yeild))
 
         # and plot it with a single command
         
         if plot == True:
-
             _yeild_str = str(round(_yeild,2)).replace(".","_")
             filename = code + "_" + _yeild_str + "_" + start_date + "~" + last_date + ".png"
 
-
-            fig = self.cerebro.plot(width=1920, height=1080, dpi=1000,style='candle', barup='red', bardown='blue')[0][0]
-            fig.savefig(filename)
-
+            self.cerebro.plot(style='candle', barup='red', bardown='blue')
+            # fig.savefig(filename)
             # print(data[datetime][-1])
             # print(data[datetime][0])
             # self.saveplots(self.cerebro,file_path = filename, style='candle', barup='red', bardown='blue') 
@@ -217,4 +212,6 @@ class Simulator:
             return figs
 
 if __name__ == "__main__":
+    # datas = yf.download(tickers=self.filter_list['종목코드'], start_date=self.start_date, last_date=self.last_date, auto_adjust=True, progress=True, threads=False)
     Simulator().simulate_each()
+

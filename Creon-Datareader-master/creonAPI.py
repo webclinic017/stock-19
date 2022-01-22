@@ -264,7 +264,7 @@ class CpStockChart:
 # 종목코드 관리하는 클래스
 class CpCodeMgr:
     def __init__(self):
-        print("CpCodeMgr __init__")
+        self.interval = 0.2
 
     # 마켓에 해당하는 종목코드 리스트 반환하는 메소드
     def get_code_list(self, market):
@@ -297,39 +297,26 @@ class CpCodeMgr:
         allcodelist= g_objCodeMgr.GetGroupCodeList(390)
         return allcodelist
 
-
-def create_kosdaq150_kosdaq_list_file():
+def create_index_list_file(index_kind):
     cpCodeMgr = CpCodeMgr()
-    codes=cpCodeMgr.get_kosdaq150()
-    dict = {}
-    # with open('kosdaq150.list','w') as out:
+    func = "cpCodeMgr.get_"+index_kind
+    codes=eval(func)()
+    if index_kind in "kospi200" : 
+        ycode_postfix = ".KS"
+    elif index_kind in "kosdaq150" : 
+        ycode_postfix = ".KQ"
+    dict ={}
     for code in codes :
         name = cpCodeMgr.get_code_name(code)
-        # print()
-        code = code.split("A")[1]+".KQ"
-        dict[code] = name
-        # out.write(code+"\n")
-
-    code_list = pd.DataFrame(list(dict.items()),
-                                    columns=('종목코드', '회사명'))
-    code_list.to_csv("kosdaq150.csv")
-
-def create_kospi200_list_file():
-    cpCodeMgr = CpCodeMgr()
-    codes=cpCodeMgr.get_kospi200()
-    # with open('kospi200.list','w') as out:
-    dict = {}
-    for code in codes :
-        # print(cpCodeMgr.get_code_name(code))
-        name = cpCodeMgr.get_code_name(code)
-        code = code.split("A")[1]+".KS"
-        # out.write(code+"\n")
-        dict[code] = name
-    code_list = pd.DataFrame(list(dict.items()),
-                                    columns=('종목코드', '회사명'))
-    code_list.to_csv("kospi200.csv")
+        ycode = code.split("A")[1]+ycode_postfix
+        dict[code] = ycode, name
+    code_list = pd.DataFrame.from_dict(dict, orient='index', columns=('야후코드' ,'회사명'))
+    code_list.index.name="종목코드"
+    code_list.to_csv(index_kind+".csv",encoding='utf-8-sig')
 
 if __name__ == "__main__":
-    create_kosdaq150_kosdaq_list_file()
-    create_kospi200_list_file()
+    # create_kosdaq150_kosdaq_list_file()
+    # create_kospi200_list_file()
+    create_index_list_file("kospi200")
+    create_index_list_file("kosdaq150")
     
