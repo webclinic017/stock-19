@@ -1,21 +1,18 @@
-import datetime
+# coding=utf-8
 import backtrader as bt
 from backtrader import plot
 import locale
-import sqlite3
 import pandas as pd
-import os
 from pymysql import NULL
 import yfinance as yf
 import my_data_reader
-import argparse
-import time
 import threading
+
+import time
+
 locale.setlocale(locale.LC_ALL, 'ko_KR')
 
 DEBUG = True
-
-lock = threading.Lock() # threading에서 Lock 함수 가져오기
 
 class CustomStrategy(bt.Strategy):
     # list of parameters which are configurable for the strategy
@@ -45,7 +42,7 @@ class CustomStrategy(bt.Strategy):
     def __init__(self):
         self.holding = 0
         self.sum_price = 0
-        print(self.params.upperband)
+        # print(self.params.upperband)
         ## RSI_SMA 와 RSI_EMA 차이?
         self.rsi_sma = bt.ind.RSI_EMA(self.data.close, period=self.params.rsi_period,
                                       upperband=self.params.upperband, lowerband=self.params.lowerband, safediv=True)
@@ -131,11 +128,12 @@ class CustomStrategy(bt.Strategy):
 
 
 class Simulator:
-    def __init__(self, cash=100000000, commission=0.3):
+    def __init__(self, cash=100000000, commission=0.3, dataReader = my_data_reader.MyDataReader()):
         # self.cerebro = bt.Cerebro()  # create a "Cerebro" engine instance
-        self.cerebro = bt.Cerebro()  # create a "Cerebro" engine instance
+        self.cerebro = bt.Cerebro(maxcpus =4)  # create a "Cerebro" engine instance
         self.cerebro.broker.setcash(cash)
         self.cerebro.broker.setcommission(commission/100)
+        self.MyDataReader = dataReader
 
     def simulate_each(self, code="A052400", index_data=NULL, index='^KQ11', start_date='2020-12-01', last_date='2022-01-01', plot=True, db="MyDataReader"):
         # code = "000660.KS"  # 하이닉스
@@ -155,21 +153,24 @@ class Simulator:
 
         if db in "MyDataReader" : 
             int_start_date = int(start_date.replace("-",""))
-            int_last_date = int(start_date.replace("-",""))
-            data = bt.feeds.PandasData(dataname=my_data_reader.MyDataReader().get_data_with_time(
+            int_last_date = int(last_date.replace("-",""))
+            data = bt.feeds.PandasData(dataname=self.MyDataReader.get_data_with_time(
                 code=code, start_date=int_start_date, last_date=int_last_date))
         else : 
-            lock.acquire()
             data = bt.feeds.PandasData(dataname=yf.download(tickers = code, start = start_date, end = last_date, auto_adjust=True,progress = True, threads=False))
-            lock.release()
-            
+
         self.cerebro.adddata(index_data)  # Add the data feed
         self.cerebro.adddata(data)
         
         self.cerebro.addstrategy(CustomStrategy)  # Add the trading strategy
 
         start_value = self.cerebro.broker.getvalue()
+        
+        start = time.time()
         self.cerebro.run()  # run it all
+        end = time.time() 
+        print(" simulate_each time : %0.2f sec"%(end - start))
+
         final_value = self.cerebro.broker.getvalue()
         if DEBUG:
             print(code)
@@ -185,11 +186,11 @@ class Simulator:
             _yeild_str = str(round(_yeild,2)).replace(".","_")
             filename = code + "_" + _yeild_str + "_" + start_date + "~" + last_date + ".png"
 
-            self.cerebro.plot(style='candle', barup='red', bardown='blue')
+            # self.cerebro.plot(style='candle', barup='red', bardown='blue')
             # fig.savefig(filename)
             # print(data[datetime][-1])
             # print(data[datetime][0])
-            # self.saveplots(self.cerebro,file_path = filename, style='candle', barup='red', bardown='blue') 
+            self.saveplots(self.cerebro,file_path = filename, style='candle', barup='red', bardown='blue') 
 
         return _yeild
 

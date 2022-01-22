@@ -315,8 +315,6 @@ def create_index_list_file(index_kind):
     code_list.to_csv(index_kind+".csv",encoding='utf-8-sig')
 
 if __name__ == "__main__":
-    # create_kosdaq150_kosdaq_list_file()
-    # create_kospi200_list_file()
     create_index_list_file("kospi200")
     create_index_list_file("kosdaq150")
     
