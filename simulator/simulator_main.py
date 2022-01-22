@@ -82,7 +82,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.disable_all_children(self.groupBox_buy_condition)
         self.disable_all_children(self.groupBox_sell_condition)
         self.disable_all_children(self.groupBox_simulation)
-
+        self.myDataReader= my_data_reader.MyDataReader()
         self.center()
 
     def center(self):
@@ -146,7 +146,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         rsi_third_band=self.lineEdit_rsi_third_band.text(),
         first_buy=float(self.lineEdit_rsi_first_buy.text())/100,
         second_buy=float(self.lineEdit_rsi_second_buy.text())/100,
-        third_buy=float(self.lineEdit_rsi_third_buy.text())/100,
+        third_buy=(float(self.lineEdit_rsi_third_buy.text())-1)/100,
         )
         print(params)
         # simulate_each(self, code="000660.KS", index='^KQ11', start_date='2018-01-01', last_date='2018-12-31', plot=True):
@@ -156,13 +156,37 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         ) + "-" + self.comboBox_last_month.currentText() + "-31"
 
         self.index_data = bt.feeds.PandasData(dataname=yf.download(
-            tickers=self.index, start_date=self.start_date, last_date=self.last_date, auto_adjust=True, progress=True, threads=False))
+            tickers=self.index, start=self.start_date, end=self.last_date, auto_adjust=True, progress=True))
 
         # self.tableWidget.setRowCount(len(self.filter_list))
 
-        self.worker = Worker(codes_dataframe=self.filter_list, commission=self.commission, cash=self.cash,
-                             index_data=self.index_data, start_date=self.start_date, last_date=self.last_date, plot=False, update_status_msg = self.update_status_msg)
-        self.worker.start()
+        # self.worker = Worker(codes_dataframe=self.filter_list, commission=self.commission, cash=self.cash,
+        #                      index_data=self.index_data, start_date=self.start_date, last_date=self.last_date, plot=False, update_status_msg = self.update_status_msg)
+        # self.worker.start()
+        
+        # results = self.pool.map(self.calculate_yield, self.filter_list['종목코드'])
+
+        start = time.time()
+        total = self.filter_list.shape[0]
+        i = 0
+        for index, row in self.filter_list.iterrows() : 
+            code = row['종목코드']
+            result,filename = self.calculate_yield(code)
+            self.update_status_msg = str(index) + " / " + str(total)
+            row['수익율'] = result
+            row['파일명'] = filename
+            i = i+1;
+            if i == 10 : break
+            
+        print(self.filter_list)
+
+        end = time.time() 
+        print("Total Simulation time : {end - start:.2f} sec", end - start)
+
+    def calculate_yield(self, code):
+        _yield = Simulator(cash=self.cash, commission=self.commission, dataReader = self.myDataReader).simulate_each(code=code,
+                                                                                     index_data=self.index_data, start_date=self.start_date, last_date=self.last_date, plot=True, db="MyDataReader")
+        return _yield
 
     def filter_start(self):
         self.enable_all_children(self.groupBox_buy_condition)

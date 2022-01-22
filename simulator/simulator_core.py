@@ -149,7 +149,7 @@ class Simulator:
 
         if index_data is NULL:
             index_data = bt.feeds.PandasData(dataname=yf.download(
-                index, start_date, last_date, auto_adjust=True,progress = False))
+                index, start_date, last_date, auto_adjust=True, progress = False))
 
         if db in "MyDataReader" : 
             int_start_date = int(start_date.replace("-",""))
@@ -157,7 +157,7 @@ class Simulator:
             data = bt.feeds.PandasData(dataname=self.MyDataReader.get_data_with_time(
                 code=code, start_date=int_start_date, last_date=int_last_date))
         else : 
-            data = bt.feeds.PandasData(dataname=yf.download(tickers = code, start = start_date, end = last_date, auto_adjust=True,progress = True, threads=False))
+            data = bt.feeds.PandasData(dataname=yf.download(tickers = code, start = start_date, end = last_date, auto_adjust=True,progress = False, threads=False))
 
         self.cerebro.adddata(index_data)  # Add the data feed
         self.cerebro.adddata(data)
@@ -184,7 +184,7 @@ class Simulator:
         
         if plot == True:
             _yeild_str = str(round(_yeild,2)).replace(".","_")
-            filename = code + "_" + _yeild_str + "_" + start_date + "~" + last_date + ".png"
+            filename = code + "_(" + _yeild_str + ")_" + start_date + "~" + last_date + ".png"
 
             # self.cerebro.plot(style='candle', barup='red', bardown='blue')
             # fig.savefig(filename)
@@ -192,7 +192,7 @@ class Simulator:
             # print(data[datetime][0])
             self.saveplots(self.cerebro,file_path = filename, style='candle', barup='red', bardown='blue') 
 
-        return _yeild
+        return _yeild, filename
 
     def saveplots(self, cerebro, numfigs=1, iplot=True, start=None, end=None,
                 width=16, height=9, dpi=300, tight=True, use=None, file_path = '', **kwargs):
