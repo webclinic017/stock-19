@@ -128,7 +128,7 @@ class CustomStrategy(bt.Strategy):
 
 
 class Simulator:
-    def __init__(self, cash=100000000, commission=0.3, dataReader = my_data_reader.MyDataReader()):
+    def __init__(self, cash=100000000, commission=0.3, dataReader = NULL):
         # self.cerebro = bt.Cerebro()  # create a "Cerebro" engine instance
         self.cerebro = bt.Cerebro(maxcpus =4)  # create a "Cerebro" engine instance
         self.cerebro.broker.setcash(cash)
@@ -186,6 +186,7 @@ class Simulator:
             import os
             if os.path.exists("png") is False: os.mkdir("png")
             _yeild_str = str(round(_yeild,2)).replace(".","_")
+            # os.path.join(pathfile,"output","log.txt")
             filename = "png/"+ code + "_(" + _yeild_str + ")_" + start_date + "~" + last_date + ".png"
 
             # self.cerebro.plot(style='candle', barup='red', bardown='blue')

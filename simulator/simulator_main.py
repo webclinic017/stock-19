@@ -25,45 +25,6 @@ from PIL import Image
 Ui_MainWindow = uic.loadUiType("justin_simulator.ui")[0]
 
 
-class Worker(QThread):
-    finished = pyqtSignal(dict)
-
-    def __init__(self, codes_dataframe, cash, commission, start_date, last_date, plot, index_data, core_num=1, update_status_msg=""):
-        super().__init__()
-        self.update_status_msg = update_status_msg
-        self.pool = ThreadPool(core_num)
-        self.filter_list = codes_dataframe
-        self.index_data = index_data
-        self.plot = plot
-        self.cash = cash
-        self.commission = commission
-        self.start_date = start_date
-        self.last_date = last_date
-        self.myDataReader= my_data_reader.MyDataReader()
-
-    def run(self):
-        
-        start = time.time()
-
-        # results = self.pool.map(self.calculate_yield, self.filter_list['종목코드'])
-        total = self.filter_list.shape[0]
-        for index, row in tqdm.tqdm(self.filter_list.iterrows(), total=total): 
-            code = row['종목코드']
-            result = self.calculate_yield(code)
-            self.update_status_msg = str(index) + " / " + str(total)
-            row['수익율'] = result
-        print(self.filter_list)
-
-        end = time.time() 
-        print("Total Simulation time : {end - start:.2f} sec", end - start)
-
-
-    def calculate_yield(self, code):
-        _yield = Simulator(cash=self.cash, commission=self.commission, dataReader = self.myDataReader).simulate_each(code=code,
-                                                                                     index_data=self.index_data, start_date=self.start_date, last_date=self.last_date, plot=self.plot, db="MyDataReader")
-        return _yield
-
-
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
@@ -74,19 +35,38 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.timer_1s.start(1000)
         self.timer_1s.timeout.connect(self.timeout_1s)
         self.update_status_msg = ""
-        self.index = '^KS11'  # 코스피
-        self.radioButton_kosdaq.clicked.connect(
-            self.chage_filter_market_status) 
-        self.radioButton_kospi.clicked.connect(self.chage_filter_market_status)
-        self.pushButton_filter.clicked.connect(self.filter_start)
-        self.pushButton_start_simulation.clicked.connect(self.simulation_start)
+        self.center()
+
+        self.groupbox_filter_init()
+        self.groupbox_simulation_init()
+
         self.disable_all_children(self.groupBox_buy_condition)
         self.disable_all_children(self.groupBox_sell_condition)
         self.disable_all_children(self.groupBox_simulation)
         self.myDataReader= my_data_reader.MyDataReader()
-        self.center()
+        
 
-        self.tableView_result.clicked.connect(self.tableView_result_clicked)
+        self.lineEdit_rsi_first_buy.textChanged.connect(self.get_lineedit_numbers)
+        self.lineEdit_rsi_second_buy.textChanged.connect(self.get_lineedit_numbers)
+        self.lineEdit_rsi_third_buy.textChanged.connect(self.get_lineedit_numbers)
+
+    def groupbox_filter_init(self) :
+        self.index = '^KS11'  # 코스피
+        self.radioButton_kosdaq.clicked.connect(
+            self.chage_filter_market_status) 
+        self.pushButton_filter.clicked.connect(self.filter_start)
+        self.radioButton_kospi.clicked.connect(self.chage_filter_market_status)
+
+    def groupbox_simulation_init(self):
+        self.pushButton_start_simulation.clicked.connect(self.simulation_start)
+
+    def get_lineedit_numbers(self) : 
+        first = int(self.lineEdit_rsi_first_buy.text())
+        second = int(self.lineEdit_rsi_second_buy.text())
+        third = int(self.lineEdit_rsi_third_buy.text())
+        self.lineEdit_rsi_first_buy_total.setText(str(first))
+        self.lineEdit_rsi_second_buy_total.setText(str(first+second))
+        self.lineEdit_rsi_third_buy_total.setText(str(first+second +third))
 
     def tableView_result_clicked(self,item) :
         cellContent = item.data()

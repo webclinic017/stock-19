@@ -1363,7 +1363,7 @@
        <bool>false</bool>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_start_simulation_2">
+     <widget class="QPushButton" name="pushButton_simulation_retry">
       <property name="enabled">
        <bool>true</bool>
       </property>
