@@ -217,10 +217,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             cursor = con.cursor()
             for index, row in tqdm.tqdm(self.df_code_name_latest_db.iterrows(), total=self.df_code_name_latest_db.shape[0]): 
                 code = row['종목코드']
-                ret, ret7254 = self.objStockChart.Request_investors_supply(code, count, in_NumOrMoney = 1)
-                if ret == False : 
-                    print(' 7254 요청 실패')
-                print(ret7254)
+                # ret, ret7254 = self.objStockChart.Request_investors_supply(code, count, in_NumOrMoney = 1)
+                # if ret == False : 
+                #     print(' 7254 요청 실패')
+                # print(ret7254)
 
                 if row['일봉 갱신날짜'] :
                     from_date = row['일봉 갱신날짜']
@@ -232,7 +232,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     continue
 
                 df = pd.DataFrame(self.rcv_data, columns=columns, index=self.rcv_data['date'])
-                df['외국인 순매수']
+                # df['외국인 순매수']
                 # 기존 DB와 겹치는 부분 제거
                 if from_date != 0:
                     df = df.loc[:from_date]

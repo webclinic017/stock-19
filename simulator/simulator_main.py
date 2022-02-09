@@ -22,7 +22,7 @@ import sys
 from PIL import Image
 
 # .ui 파일에서 직접 클래스 생성하는 경우 주석 해제
-Ui_MainWindow = uic.loadUiType("justin_simulator.ui")[0]
+Ui_MainWindow = uic.loadUiType("simulator_v0.2.ui")[0]
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -44,7 +44,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.disable_all_children(self.groupBox_sell_condition)
         self.disable_all_children(self.groupBox_simulation)
         self.myDataReader= my_data_reader.MyDataReader()
-        
 
         self.lineEdit_rsi_first_buy.textChanged.connect(self.get_lineedit_numbers)
         self.lineEdit_rsi_second_buy.textChanged.connect(self.get_lineedit_numbers)
@@ -53,12 +52,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def groupbox_filter_init(self) :
         self.index = '^KS11'  # 코스피
         self.radioButton_kosdaq.clicked.connect(
-            self.chage_filter_market_status) 
+            self.chage_filter_market_status)
         self.pushButton_filter.clicked.connect(self.filter_start)
         self.radioButton_kospi.clicked.connect(self.chage_filter_market_status)
 
     def groupbox_simulation_init(self):
         self.pushButton_start_simulation.clicked.connect(self.simulation_start)
+        self.pushButton_simulation_retry.clicked.connect(self.pushButton_simulation_clear)
+
+    def pushButton_simulation_clear(self):
+        self.tableView_result.clearSpans()
 
     def get_lineedit_numbers(self) : 
         first = int(self.lineEdit_rsi_first_buy.text())
@@ -77,7 +80,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             image = Image.open(cellContent)
             image.show()
         
-
     def center(self):
         qr = self.frameGeometry()
         cp = QDesktopWidget().availableGeometry().center()
@@ -107,9 +109,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.travel_all_children(groupbox, True)
 
     def simulation_start(self):
-        self.disable_all_children(self.groupBox_buy_condition)
-        self.disable_all_children(self.groupBox_sell_condition)
-        self.disable_all_children(self.groupBox_simulation)
+        # self.disable_all_children(self.groupBox_buy_condition)
+        # self.disable_all_children(self.groupBox_sell_condition)
+        # self.disable_all_children(self.groupBox_simulation)
         self.disable_all_children(self.groupBox_filter)
         self.update_status_msg = "시뮬레이션 시작"
 
@@ -140,9 +142,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         first_buy=float(self.lineEdit_rsi_first_buy.text())/100,
         second_buy=float(self.lineEdit_rsi_second_buy.text())/100,
         third_buy=(float(self.lineEdit_rsi_third_buy.text())-1)/100,
+
         )
-        print(params)
-        # simulate_each(self, code="000660.KS", index='^KQ11', start_date='2018-01-01', last_date='2018-12-31', plot=True):
+        
         self.start_date = self.comboBox_start_year.currentText(
         ) + "-" + self.comboBox_start_month.currentText() + "-01"
         self.last_date = self.comboBox_last_year.currentText(
@@ -151,17 +153,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.index_data = bt.feeds.PandasData(dataname=yf.download(
             tickers=self.index, start=self.start_date, end=self.last_date, auto_adjust=True, progress=True))
 
-        # self.tableWidget.setRowCount(len(self.filter_list))
-
-        # self.worker = Worker(codes_dataframe=self.filter_list, commission=self.commission, cash=self.cash,
-        #                      index_data=self.index_data, start_date=self.start_date, last_date=self.last_date, plot=False, update_status_msg = self.update_status_msg)
-        # self.worker.start()
-        
-        # results = self.pool.map(self.calculate_yield, self.filter_list['종목코드'])
-
         start = time.time()
         total = self.filter_list.shape[0]
-        # i = 0
+
         result_dict = {}
         for index, row in self.filter_list.iterrows() : 
             code = row['종목코드']
@@ -170,8 +164,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             result_dict[code] = row['회사명'], round(result,2), filename
             if self.checkBox_test.isChecked() : 
                 break
-            # i = i+1
-            # if i == 3 : break
 
         result_dataframe = pd.DataFrame.from_dict(result_dict, orient='index', columns=('종목명' ,'수익율',"파일명"))
         result_dataframe.index.name="종목코드"
@@ -182,7 +174,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tableView_result.resizeColumnToContents(0)
 
         end = time.time() 
-        print("Total Simulation time : {end - start:.2f} sec", end - start)
+        print("Total Simulation time : %0.2f sec" % (end - start))
 
     def calculate_yield(self, code):
         _yield = Simulator(cash=self.cash, commission=self.commission, dataReader = self.myDataReader).simulate_each(code=code,
