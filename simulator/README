@@ -1,0 +1,7 @@
+실행파일 만들기 : https://wikidocs.net/21952
+
+콘솔창 출력안하기
+pyinstaller -w simulator_main.py
+
+실행파일 하나만 만들기
+pyinstaller -F simulator_main.py

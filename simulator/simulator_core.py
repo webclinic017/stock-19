@@ -7,6 +7,7 @@ from pymysql import NULL
 import yfinance as yf
 import my_data_reader
 import threading
+from pycrunch_trace.client.api import trace
 
 import time
 
@@ -134,7 +135,7 @@ class Simulator:
         self.cerebro.broker.setcash(cash)
         self.cerebro.broker.setcommission(commission/100)
         self.MyDataReader = dataReader
-
+    
     def simulate_each(self, code="A052400", index_data=NULL, index='^KQ11', start_date='2020-12-01', last_date='2022-01-01', plot=True, db="MyDataReader"):
         # code = "000660.KS"  # 하이닉스
         # code = "005930.KS" # 삼성전자
@@ -183,19 +184,21 @@ class Simulator:
         # and plot it with a single command
         
         if plot == True:
-            import os
-            if os.path.exists("png") is False: os.mkdir("png")
-            _yeild_str = str(round(_yeild,2)).replace(".","_")
-            # os.path.join(pathfile,"output","log.txt")
-            filename = "png/"+ code + "_(" + _yeild_str + ")_" + start_date + "~" + last_date + ".png"
+            # import os
+            # if os.path.exists("png") is False: os.mkdir("png")
+            # _yeild_str = str(round(_yeild,2)).replace(".","_")
+            # # os.path.join(pathfile,"output","log.txt")
+            # filename = "png/"+ code + "_(" + _yeild_str + ")_" + start_date + "~" + last_date + ".png"
 
-            # self.cerebro.plot(style='candle', barup='red', bardown='blue')
-            # fig.savefig(filename)
-            # print(data[datetime][-1])
-            # print(data[datetime][0])
-            self.saveplots(self.cerebro,file_path = filename, style='candle', barup='red', bardown='blue') 
-
-        return _yeild, filename
+            # # self.cerebro.plot(style='candle', barup='red', bardown='blue')
+            # # fig.savefig(filename)
+            # # print(data[datetime][-1])
+            # # print(data[datetime][0])
+            # self.saveplots(self.cerebro,file_path = filename, style='candle', barup='red', bardown='blue')     
+            self.cerebro.plot(style='candle', barup='red', bardown='blue')
+            return _yeild, "자세히 보기 "+code
+        else :         
+            return _yeild, "자세히 보기 "+code
 
     def saveplots(self, cerebro, numfigs=1, iplot=True, start=None, end=None,
                 width=16, height=9, dpi=300, tight=True, use=None, file_path = '', **kwargs):
@@ -217,5 +220,6 @@ class Simulator:
 
 if __name__ == "__main__":
     # datas = yf.download(tickers=self.filter_list['종목코드'], start_date=self.start_date, last_date=self.last_date, auto_adjust=True, progress=True, threads=False)
+    # Simulator(dataReader = self.myDataReader).simulate_each(code=code,index_data=self.index_data, start_date=self.start_date, last_date=self.last_date, plot=False, db="MyDataReader")
+    
     Simulator().simulate_each()
-
