@@ -47,7 +47,7 @@ class CpStockChart:
 
     # 차트 요청 - 최근일 부터 개수 기준
     @check_PLUS_status
-    def RequestDay(self, code, count, caller: 'MainWindow', from_date=0, ohlcv_only=True):
+    def RequestDay(self, caller: 'MainWindow', code = "A000020",  from_date=0):
         """
         http://cybosplus.github.io/cpsysdib_rtf_1_/stockchart.htm
 
@@ -120,7 +120,7 @@ class CpStockChart:
         # rcv_oldest_date = rcv_data['date'][-1]
 
         rcv_count += rcv_batch_len
-        caller.return_status_msg = '{} / {}'.format(rcv_count, count)
+        caller.return_status_msg = '{} : {}'.format(code, rcv_batch_len)
 
         # 서버가 가진 모든 데이터를 요청한 경우 break.
         # g_objStockChart.Continue 는 개수로 요청한 경우

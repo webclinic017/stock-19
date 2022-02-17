@@ -235,7 +235,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 else:
                     from_date = 20020101
 
-                if self.objStockChart.RequestDay(code, self, from_date, ohlcv_only=False) == False:
+                if self.objStockChart.RequestDay(self, code = code,  from_date = from_date) == False:
                     print("RequestDWM() return False")
                     continue
 
@@ -254,7 +254,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # 메모리 overflow 방지
                 del df
                 gc.collect()
-                self.update_status_msg = code
+                self.update_status_msg = '{} / {}'.format(count, total)
                 count += 1
 
         self.connect_code_list_view()
