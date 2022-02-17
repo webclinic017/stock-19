@@ -57,6 +57,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.get_lineedit_numbers)
         self.is_profiling = False
 
+        self.sum_yield = 0
+        self.sum_count = 0
+
     def profile_start_finish(self):
         if self.is_profiling == False:
             print("off -> on")
@@ -98,6 +101,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEdit_rsi_second_buy_total.setText(str(first+second))
         self.lineEdit_rsi_third_buy_total.setText(str(first+second + third))
 
+    def update_result_overview(self, text):
+        self.lineEdit_result_overview.setText(text)
+
     def tableView_result_clicked(self, item):
         cellContent = item.data()
         print(cellContent)  # test
@@ -108,7 +114,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             image.show()
         if "자세히 보기" in cellContent:
             code = cellContent.split()[2]
-            Simulator(cash=self.cash, commission=self.commission, dataReader=self.myDataReader).simulate_each(code=code,index_data=self.index_data, start_date=self.start_date, last_date=self.last_date, plot=True, db="MyDataReader")
+            Simulator(cash=self.cash, commission=self.commission, dataReader=self.myDataReader).simulate_each(
+                code=code, index_data=self.index_data, start_date=self.start_date, last_date=self.last_date, plot=True, db="MyDataReader")
 
     def center(self):
         qr = self.frameGeometry()
@@ -137,11 +144,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def enable_all_children(self, groupbox):
         self.travel_all_children(groupbox, True)
-        
-    
-    @trace(additional_excludes=['C:/Users/qmxmp/.conda/envs/py38_64/lib/site-packages/backtrader',
-                                "C:/Users/qmxmp/.conda/envs/py38_64/lib/site-packages/pandas"])
-    def simulation_start(self,trace):
+
+    # @trace(additional_excludes=['C:\\Users\\qmxmp\\.conda\\envs'])
+    def simulation_start(self, trace):
 
         # self.disable_all_children(self.groupBox_buy_condition)
         # self.disable_all_children(self.groupBox_sell_condition)
@@ -213,11 +218,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tableView_result.resizeColumnToContents(0)
 
         end = time.time()
-        print("Total Simulation time : %0.2f sec" % (end - start))
+        overview_result = self.sum_yield / self.sum_count
+        simulation_time = "시뮬레이션 시간 : %0.2f sec" % (
+            end - start)
+        yiled = "총 수익률 " + str(round(overview_result, 2)) +"%"
+        count = "총 종목수 " + str(self.sum_count)
+        result = " "+yiled + " (" + count+")    :   " + simulation_time
+        print(result)
+        self.update_result_overview(result)
 
     def calculate_yield(self, code):
         _yield, filename = Simulator(cash=self.cash, commission=self.commission, dataReader=self.myDataReader).simulate_each(code=code,
                                                                                                                              index_data=self.index_data, start_date=self.start_date, last_date=self.last_date, plot=False, db="MyDataReader")
+        self.sum_yield += _yield
+        self.sum_count += 1
         return _yield, filename
 
     def filter_start(self):

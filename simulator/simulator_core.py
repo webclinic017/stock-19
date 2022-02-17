@@ -135,7 +135,8 @@ class Simulator:
         self.cerebro.broker.setcash(cash)
         self.cerebro.broker.setcommission(commission/100)
         self.MyDataReader = dataReader
-    
+
+    # @trace(additional_excludes=['C:\\Users\\qmxmp\\.conda\\envs\\py38_64\\lib\\site-packages'])
     def simulate_each(self, code="A052400", index_data=NULL, index='^KQ11', start_date='2020-12-01', last_date='2022-01-01', plot=True, db="MyDataReader"):
         # code = "000660.KS"  # 하이닉스
         # code = "005930.KS" # 삼성전자
@@ -162,7 +163,6 @@ class Simulator:
 
         self.cerebro.adddata(index_data)  # Add the data feed
         self.cerebro.adddata(data)
-        
         self.cerebro.addstrategy(CustomStrategy)  # Add the trading strategy
 
         start_value = self.cerebro.broker.getvalue()
@@ -170,7 +170,7 @@ class Simulator:
         start = time.time()
         self.cerebro.run()  # run it all
         end = time.time() 
-        print(" simulate_each time : %0.2f sec"%(end - start))
+        print("simulate_each time : %0.2f sec"%(end - start))
 
         final_value = self.cerebro.broker.getvalue()
         if DEBUG:

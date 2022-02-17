@@ -47,38 +47,51 @@ class CpStockChart:
 
     # 차트 요청 - 최근일 부터 개수 기준
     @check_PLUS_status
-    def RequestDWM(self, code, dwm, count, caller: 'MainWindow', from_date=0, ohlcv_only=True):
+    def RequestDay(self, code, count, caller: 'MainWindow', from_date=0, ohlcv_only=True):
         """
+        http://cybosplus.github.io/cpsysdib_rtf_1_/stockchart.htm
+
         :param code: 종목코드
-        :param dwm: 'D':일봉, 'W':주봉, 'M':월봉
+        :param dwm: 'D':일봉, 'W':주봉, 'M':월봉 (무조건 D)
         :param count: 요청할 데이터 개수
         :param caller: 이 메소드 호출한 인스턴스. 결과 데이터를 caller의 멤버로 전달하기 위함
         :return: None
         """
         g_objStockChart.SetInputValue(0, code)  # 종목코드
-        g_objStockChart.SetInputValue(1, ord('2'))  # 개수로 받기
-        g_objStockChart.SetInputValue(4, count)  # 최근 count개
+        g_objStockChart.SetInputValue(1, ord('1'))  # 기간으로 받기 
+        # g_objStockChart.SetInputValue(4, count)  # 최근 count개
+        # g_objStockChart.SetInputValue(2, toDate)  # To 날짜 latest?? 
+        g_objStockChart.SetInputValue(3, from_date)  # From 날짜
 
-        if ohlcv_only:
-            g_objStockChart.SetInputValue(5, [0, 2, 3, 4, 5, 8])  # 요청항목 - 날짜,시가,고가,저가,종가,거래량
-            rq_column = ('date', 'open', 'high', 'low', 'close', 'volume')
-        else:
-            # 요청항목
-            g_objStockChart.SetInputValue(5, [0, # 날짜
-                                                2, # 시가
-                                                3, # 고가
-                                                4, # 저가
-                                                5, # 종가
-                                                8, # 거래량
-                                                13,  # 시가총액
-                                                16,  # 외국인현보유수량
-                                                20,  # 기관순매수
-                                                ])
-            # 요청한 항목들을 튜플로 만들어 사용
-            rq_column = ('date', 'open', 'high', 'low', 'close', 'volume', 
-                         '시가총액', '외국인현보유수량', '기관순매수')
+        # 요청항목
+        g_objStockChart.SetInputValue(5, [0, # 날짜
+                                            2, # 시가
+                                            3, # 고가
+                                            4, # 저가
+                                            5, # 종가
+                                            8, # 거래량
+                                            9, # 거래대금
+                                            12, # 상장주식수
+                                            13, # 시가총액
+                                            14, # 외국인주문한도수량(ulong)
+                                            15, #외국인주문가능수량(ulong)
+                                            16, #외국인현보유수량(ulong)
+                                            17, #외국인현보유비율(float)
+                                            18, #수정주가일자(ulong) - YYYYMMDD
+                                            19, #수정주가비율(float)
+                                            20, #기관순매수(long)
+                                            21, #기관누적순매수(long)
+                                            22, #등락주선(long)
+                                            23, #등락비율(float)
+                                            24, #예탁금(ulonglong)
+                                            25, #주식회전율(float)
+                                            26, #거래성립률(float)
+                                            ])
+        # 요청한 항목들을 튜플로 만들어 사용
+        rq_column = ('date', 'open', 'high', 'low', 'close', 'volume', 
+                        '거래대금', '상장주식수','시가총액','외국인주문한도수량','외국인주문가능수량','외국인현보유수량','외국인현보유비율','수정주가일자','수정주가비율','기관순매수','기관누적순매수','등락주선','등락비율','예탁금','주식회전율','거래성립률')
 
-        g_objStockChart.SetInputValue(6, dwm)  # '차트 주기 - 일/주/월
+        g_objStockChart.SetInputValue(6, ord('D'))  # '차트 주기 - 일/주/월
         g_objStockChart.SetInputValue(9, ord('1'))  # 수정주가 사용
 
         rcv_data = {}
@@ -86,35 +99,33 @@ class CpStockChart:
             rcv_data[col] = []
 
         rcv_count = 0
-        while count > rcv_count:
-            g_objStockChart.BlockRequest()  # 요청! 후 응답 대기
-            self._check_rq_status()  # 통신상태 검사
-            time.sleep(self.INTERVAL_TIME)  # 시간당 RQ 제한으로 인해 장애가 발생하지 않도록 딜레이를 줌
+        # while count > rcv_count:
+        g_objStockChart.BlockRequest()  # 요청! 후 응답 대기
 
-            rcv_batch_len = g_objStockChart.GetHeaderValue(3)  # 받아온 데이터 개수
-            rcv_batch_len = min(rcv_batch_len, count - rcv_count)  # 정확히 count 개수만큼 받기 위함
-            for i in range(rcv_batch_len):
-                for col_idx, col in enumerate(rq_column):
-                    rcv_data[col].append(g_objStockChart.GetDataValue(col_idx, i))
+        self._check_rq_status()  # 통신상태 검사 : 이상시 종료함! 
 
-            if len(rcv_data['date']) == 0:  # 데이터가 없는 경우
-                print(code, '데이터 없음')
-                return False
+        time.sleep(self.INTERVAL_TIME)  # 시간당 RQ 제한으로 인해 장애가 발생하지 않도록 딜레이를 줌
 
-            # rcv_batch_len 만큼 받은 데이터의 가장 오래된 date
-            rcv_oldest_date = rcv_data['date'][-1]
+        rcv_batch_len = g_objStockChart.GetHeaderValue(3)  # 받아온 데이터 개수
 
-            rcv_count += rcv_batch_len
-            caller.return_status_msg = '{} / {}'.format(rcv_count, count)
+        for i in range(rcv_batch_len):
+            for col_idx, col in enumerate(rq_column):
+                rcv_data[col].append(g_objStockChart.GetDataValue(col_idx, i))
 
-            # 서버가 가진 모든 데이터를 요청한 경우 break.
-            # g_objStockChart.Continue 는 개수로 요청한 경우
-            # count만큼 이미 다 받았더라도 계속 1의 값을 가지고 있어서
-            # while 조건문에서 count > rcv_count를 체크해줘야 함.
-            if not g_objStockChart.Continue:
-                break
-            if rcv_oldest_date < from_date:
-                break
+        if len(rcv_data['date']) == 0:  # 데이터가 없는 경우
+            print(code, '데이터 없음')
+            return False
+
+        # rcv_batch_len 만큼 받은 데이터의 가장 오래된 date
+        # rcv_oldest_date = rcv_data['date'][-1]
+
+        rcv_count += rcv_batch_len
+        caller.return_status_msg = '{} / {}'.format(rcv_count, count)
+
+        # 서버가 가진 모든 데이터를 요청한 경우 break.
+        # g_objStockChart.Continue 는 개수로 요청한 경우
+        # count만큼 이미 다 받았더라도 계속 1의 값을 가지고 있어서
+        # while 조건문에서 count > rcv_count를 체크해줘야 함.
 
         caller.rcv_data = rcv_data  # 받은 데이터를 caller의 멤버에 저장
         return True

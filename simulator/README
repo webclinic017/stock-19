@@ -5,3 +5,6 @@ pyinstaller -w simulator_main.py
 
 실행파일 하나만 만들기
 pyinstaller -F simulator_main.py
+
+trace
+https://github.com/gleb-sevruk/pycrunch-trace
