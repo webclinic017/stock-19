@@ -3,6 +3,7 @@ import win32com.client
 import time
 import csv
 import pandas as pd
+import creon_datareader
 
 g_objCpStatus = win32com.client.Dispatch('CpUtil.CpCybos')
 g_objCodeMgr =win32com.client.Dispatch('CpUtil.CpCodeMgr')
@@ -58,11 +59,10 @@ class CpStockChart:
         :return: None
         """
         g_objStockChart.SetInputValue(0, code)  # 종목코드
-        g_objStockChart.SetInputValue(1, ord('1'))  # 기간으로 받기 
-        # g_objStockChart.SetInputValue(4, count)  # 최근 count개
-        # g_objStockChart.SetInputValue(2, toDate)  # To 날짜 latest?? 
-        g_objStockChart.SetInputValue(3, from_date)  # From 날짜
-
+        count = 200000
+        g_objStockChart.SetInputValue(1, ord('2'))  # 개수로 받기
+        g_objStockChart.SetInputValue(4, count)  # 개수로 받기
+            
         # 요청항목
         g_objStockChart.SetInputValue(5, [0, # 날짜
                                             2, # 시가
@@ -98,34 +98,40 @@ class CpStockChart:
         for col in rq_column:
             rcv_data[col] = []
 
+        
         rcv_count = 0
-        # while count > rcv_count:
-        g_objStockChart.BlockRequest()  # 요청! 후 응답 대기
+        while count > rcv_count:
+            g_objStockChart.BlockRequest()  # 요청! 후 응답 대기
 
-        self._check_rq_status()  # 통신상태 검사 : 이상시 종료함! 
+            self._check_rq_status()  # 통신상태 검사 : 이상시 종료함! 
 
-        time.sleep(self.INTERVAL_TIME)  # 시간당 RQ 제한으로 인해 장애가 발생하지 않도록 딜레이를 줌
+            time.sleep(self.INTERVAL_TIME)  # 시간당 RQ 제한으로 인해 장애가 발생하지 않도록 딜레이를 줌
 
-        rcv_batch_len = g_objStockChart.GetHeaderValue(3)  # 받아온 데이터 개수
+            rcv_batch_len = g_objStockChart.GetHeaderValue(3)  # 받아온 데이터 개수
 
-        for i in range(rcv_batch_len):
-            for col_idx, col in enumerate(rq_column):
-                rcv_data[col].append(g_objStockChart.GetDataValue(col_idx, i))
+            for i in range(rcv_batch_len):
+                for col_idx, col in enumerate(rq_column):
+                    rcv_data[col].append(g_objStockChart.GetDataValue(col_idx, i))
 
-        if len(rcv_data['date']) == 0:  # 데이터가 없는 경우
-            print(code, '데이터 없음')
-            return False
+            if len(rcv_data['date']) == 0:  # 데이터가 없는 경우
+                print(code, '데이터 없음')
+                return False
 
-        # rcv_batch_len 만큼 받은 데이터의 가장 오래된 date
-        # rcv_oldest_date = rcv_data['date'][-1]
+            # rcv_batch_len 만큼 받은 데이터의 가장 오래된 date
+            rcv_oldest_date = rcv_data['date'][-1]
+            rcv_latest_date = rcv_data['date'][0]
 
-        rcv_count += rcv_batch_len
-        caller.return_status_msg = '{} : {}'.format(code, rcv_batch_len)
+            rcv_count += rcv_batch_len
+            caller.return_status_msg = '{} : {} ~ {}'.format(code,rcv_oldest_date,rcv_latest_date)
 
-        # 서버가 가진 모든 데이터를 요청한 경우 break.
-        # g_objStockChart.Continue 는 개수로 요청한 경우
-        # count만큼 이미 다 받았더라도 계속 1의 값을 가지고 있어서
-        # while 조건문에서 count > rcv_count를 체크해줘야 함.
+            # 서버가 가진 모든 데이터를 요청한 경우 break.
+            # self.objStockChart.Continue 는 개수로 요청한 경우
+            # count만큼 이미 다 받았더라도 계속 1의 값을 가지고 있어서
+            # while 조건문에서 count > rcv_count를 체크해줘야 함.
+            if not g_objStockChart.Continue:
+                break
+            if rcv_oldest_date < from_date:
+                break
 
         caller.rcv_data = rcv_data  # 받은 데이터를 caller의 멤버에 저장
         return True
@@ -191,7 +197,7 @@ class CpStockChart:
 
     # 차트 요청 - 분간, 틱 차트
     @check_PLUS_status
-    def RequestMT(self, code, dwm, tick_range, count, caller: 'MainWindow', from_date=0, ohlcv_only=True):
+    def RequestMT(self, caller: 'MainWindow', code = "A000020", from_date=0):
         """
         :param code: 종목 코드
         :param dwm: 'm':분봉, 'T':틱봉
@@ -200,34 +206,35 @@ class CpStockChart:
         :param caller: 이 메소드 호출한 인스턴스. 결과 데이터를 caller의 멤버로 전달하기 위함
         :return:
         """
+        count = 200000  # 서버 데이터 최대 reach 약 18.5만 이므로 (18/02/25 기준)
         g_objStockChart.SetInputValue(0, code)  # 종목코드
-        g_objStockChart.SetInputValue(1, ord('2'))  # 개수로 받기
-        g_objStockChart.SetInputValue(4, count)  # 조회 개수
-        if ohlcv_only:
-            g_objStockChart.SetInputValue(5, [0, 1, 2, 3, 4, 5, 8])  # 요청항목 - 날짜, 시간,시가,고가,저가,종가,거래량
-            rq_column = ('date', 'time', 'open', 'high', 'low', 'close', 'volume')
-        else:
-            # 요청항목
-            g_objStockChart.SetInputValue(5, [0, # 날짜
-                                                1, # 시간
-                                                2, # 시가
-                                                3, # 고가
-                                                4, # 저가
-                                                5, # 종가
-                                                8, # 거래량
-                                                13,  # 시가총액
-                                                14,  # 외국인주문한도수량
-                                                16,  # 외국인현보유수량
-                                                17,  # 외국인현보유비율
-                                                20,  # 기관순매수
-                                                21,  # 기관누적순매수
-                                                ])
-            # 요청한 항목들을 튜플로 만들어 사용
-            rq_column = ('date', 'time', 'open', 'high', 'low', 'close', 'volume', 
-                         '시가총액', '외국인주문한도수량', '외국인현보유수량', '외국인현보유비율', '기관순매수', '기관누적순매수')
 
-        g_objStockChart.SetInputValue(6, dwm)  # '차트 주기 - 분/틱
-        g_objStockChart.SetInputValue(7, tick_range)  # 분틱차트 주기
+        if from_date == 0 :
+            # g_objStockChart.SetInputValue(1, ord('1'))  # 기간으로 받기
+            # g_objStockChart.SetInputValue(4, count)  # 조회 개수
+            
+            g_objStockChart.SetInputValue(1, ord('2'))  # 개수로 받기
+            g_objStockChart.SetInputValue(4, count)  # 개수로 받기
+        else :
+            g_objStockChart.SetInputValue(1, ord('1'))  # 기간으로 받기
+            g_objStockChart.SetInputValue(3, from_date)  # 기간으로 받기
+            
+        g_objStockChart.SetInputValue(5, [0, # 날짜
+                                            1, # 시간
+                                            2, # 시가
+                                            3, # 고가
+                                            4, # 저가
+                                            5, # 종가
+                                            8, # 거래량
+                                            9, # 거래대금
+                                            10, # 누적체결매도수량
+                                            11, # 누적체결매수수량
+                                            ])
+        # 요청한 항목들을 튜플로 만들어 사용
+        rq_column = ('date', 'time', 'open', 'high', 'low', 'close', 'volume', '거래대금','누적체결매도수량','누적체결매수수량')
+
+        g_objStockChart.SetInputValue(6, ord('m'))  # '차트 주기 - 분
+        g_objStockChart.SetInputValue(7, 1)  # 분틱차트 주기
         g_objStockChart.SetInputValue(9, ord('1'))  # 수정주가 사용
 
         rcv_data = {}
@@ -252,9 +259,10 @@ class CpStockChart:
 
             # len 만큼 받은 데이터의 가장 오래된 date
             rcv_oldest_date = int('{}{:04}'.format(rcv_data['date'][-1], rcv_data['time'][-1]))
+            rcv_latest_date = int('{}{:04}'.format(rcv_data['date'][0], rcv_data['time'][0]))
 
             rcv_count += rcv_batch_len
-            caller.return_status_msg = '{} / {}(maximum)'.format(rcv_count, count)
+            caller.return_status_msg = '{} : {} ~ {}'.format(code,rcv_oldest_date,rcv_latest_date)
 
             # 서버가 가진 모든 데이터를 요청한 경우 break.
             # g_objStockChart.Continue 는 개수로 요청한 경우
@@ -326,6 +334,6 @@ def create_index_list_file(index_kind):
     code_list.to_csv(index_kind+".csv",encoding='utf-8-sig')
 
 if __name__ == "__main__":
-    create_index_list_file("kospi200")
-    create_index_list_file("kosdaq150")
-    
+    # create_index_list_file("kospi200")
+    # create_index_list_file("kosdaq150")
+    creon_datareader.main_gui()    

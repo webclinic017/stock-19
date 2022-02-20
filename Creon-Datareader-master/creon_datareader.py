@@ -147,7 +147,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 cursor.execute(cmd)
                 dict_df_code_latest[db_code[0]] = cursor.fetchall()[0][0]
         except IndexError:
-            print("Exception : " + db_code + " no data. skip")
+            print("Exception : " + str(db_code) + " no data. skip")
 
         db_code_day_latest_df = pd.DataFrame(list(dict_df_code_latest.items()),
                                              columns=('종목코드', '일봉 갱신날짜'))
@@ -172,16 +172,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @decorators.return_status_msg_setter
     def update_price_db_min(self):
-        count = 200000  # 서버 데이터 최대 reach 약 18.5만 이므로 (18/02/25 기준)
-        tick_range = 1
-        columns = ['open', 'high', 'low', 'close', 'volume']
-
-        from_date = np.dtype(np.int64)
-        for index, row in tqdm.tqdm(self.df_code_name_latest_db.iterrows(), total=self.df_code_name_latest_db.shape[0]):
+        # RequestMT() 내의  date + time 를 date 로 합침
+        columns = ['open', 'high', 'low', 'close', 'volume', '거래대금','누적체결매도수량','누적체결매수수량']
+        total = self.df_code_name_latest_db.shape[0]
+        count = 0
+        for index, row in tqdm.tqdm(self.df_code_name_latest_db.iterrows(), total=total):
 
             file_path = self.directory_min_db + "/" + row['파일명']
             code = row['종목코드']
-            name = row['종목명']
             if code in self.blacklist:
                 continue
 
@@ -191,11 +189,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # t.update(1)
 
                 if row['분봉 갱신날짜']:
-                    from_date = row['분봉 갱신날짜']
+                    from_date = int(row['분봉 갱신날짜'] / 10000)
                 else:
                     from_date = 0
 
-                if self.objStockChart.RequestMT(code, ord('m'), tick_range, count, self, from_date, ohlcv_only=True) == False:
+                if self.objStockChart.RequestMT(self, code=code, from_date=from_date) == False:
                     print("RequestMT() return False")
                     continue
 
@@ -212,6 +210,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 df.to_sql(name="stock", con=con,
                           if_exists='append', index_label='date')
 
+                self.update_status_msg = '{} / {}'.format(count, total)
+                count += 1
                 # 메모리 overflow 방지
                 del df
                 gc.collect()
@@ -224,7 +224,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                    '외국인현보유수량', '외국인현보유비율', '수정주가일자', '수정주가비율', '기관순매수', '기관누적순매수', '등락주선', '등락비율', '예탁금', '주식회전율', '거래성립률']
 
         with sqlite3.connect(self.db_file_day) as con:
-            cursor = con.cursor()
             count = 0
             total = self.df_code_name_latest_db.shape[0]
             for index, row in tqdm.tqdm(self.df_code_name_latest_db.iterrows(), total=total):
