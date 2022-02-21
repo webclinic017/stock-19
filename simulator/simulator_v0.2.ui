@@ -379,7 +379,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>40</y>
+        <y>60</y>
         <width>360</width>
         <height>21</height>
        </rect>
@@ -392,7 +392,7 @@
       <property name="geometry">
        <rect>
         <x>160</x>
-        <y>40</y>
+        <y>60</y>
         <width>30</width>
         <height>21</height>
        </rect>
@@ -405,7 +405,7 @@
       <property name="geometry">
        <rect>
         <x>270</x>
-        <y>40</y>
+        <y>60</y>
         <width>30</width>
         <height>21</height>
        </rect>
@@ -418,7 +418,7 @@
       <property name="geometry">
        <rect>
         <x>370</x>
-        <y>40</y>
+        <y>60</y>
         <width>30</width>
         <height>21</height>
        </rect>
@@ -431,7 +431,7 @@
       <property name="geometry">
        <rect>
         <x>160</x>
-        <y>70</y>
+        <y>90</y>
         <width>30</width>
         <height>21</height>
        </rect>
@@ -444,7 +444,7 @@
       <property name="geometry">
        <rect>
         <x>230</x>
-        <y>70</y>
+        <y>90</y>
         <width>30</width>
         <height>21</height>
        </rect>
@@ -457,7 +457,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>70</y>
+        <y>90</y>
         <width>360</width>
         <height>21</height>
        </rect>
@@ -470,7 +470,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>100</y>
+        <y>120</y>
         <width>381</width>
         <height>21</height>
        </rect>
@@ -483,7 +483,7 @@
       <property name="geometry">
        <rect>
         <x>150</x>
-        <y>100</y>
+        <y>120</y>
         <width>30</width>
         <height>21</height>
        </rect>
@@ -496,7 +496,7 @@
       <property name="geometry">
        <rect>
         <x>230</x>
-        <y>100</y>
+        <y>120</y>
         <width>30</width>
         <height>21</height>
        </rect>
@@ -509,7 +509,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>120</y>
+        <y>140</y>
         <width>371</width>
         <height>21</height>
        </rect>
@@ -522,7 +522,7 @@
       <property name="geometry">
        <rect>
         <x>150</x>
-        <y>120</y>
+        <y>140</y>
         <width>30</width>
         <height>21</height>
        </rect>
@@ -535,7 +535,7 @@
       <property name="geometry">
        <rect>
         <x>230</x>
-        <y>120</y>
+        <y>140</y>
         <width>30</width>
         <height>21</height>
        </rect>
@@ -548,7 +548,7 @@
       <property name="geometry">
        <rect>
         <x>150</x>
-        <y>140</y>
+        <y>160</y>
         <width>30</width>
         <height>21</height>
        </rect>
@@ -561,7 +561,7 @@
       <property name="geometry">
        <rect>
         <x>230</x>
-        <y>140</y>
+        <y>160</y>
         <width>30</width>
         <height>21</height>
        </rect>
@@ -574,7 +574,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>140</y>
+        <y>160</y>
         <width>381</width>
         <height>21</height>
        </rect>
@@ -626,7 +626,7 @@
       <property name="geometry">
        <rect>
         <x>330</x>
-        <y>100</y>
+        <y>120</y>
         <width>30</width>
         <height>21</height>
        </rect>
@@ -642,7 +642,7 @@
       <property name="geometry">
        <rect>
         <x>330</x>
-        <y>120</y>
+        <y>140</y>
         <width>30</width>
         <height>21</height>
        </rect>
@@ -658,7 +658,7 @@
       <property name="geometry">
        <rect>
         <x>330</x>
-        <y>140</y>
+        <y>160</y>
         <width>30</width>
         <height>21</height>
        </rect>
@@ -670,6 +670,72 @@
        <bool>true</bool>
       </property>
      </widget>
+     <widget class="QLineEdit" name="lineEdit_rsi_period_2">
+      <property name="geometry">
+       <rect>
+        <x>180</x>
+        <y>240</y>
+        <width>30</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>10</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_rsi_third_buy_2">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>240</y>
+        <width>30</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>10</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="filter_11">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>240</y>
+        <width>391</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>               당일 거래량이 지난            일 평균 거래량의          배 일때</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>81</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>RSI 조건</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_2">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>220</y>
+        <width>81</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>거래량 조건</string>
+      </property>
+     </widget>
+     <zorder>filter_11</zorder>
      <zorder>filter_4</zorder>
      <zorder>filter_7</zorder>
      <zorder>tableView_3</zorder>
@@ -694,6 +760,10 @@
      <zorder>lineEdit_rsi_first_buy_total</zorder>
      <zorder>lineEdit_rsi_second_buy_total</zorder>
      <zorder>lineEdit_rsi_third_buy_total</zorder>
+     <zorder>lineEdit_rsi_period_2</zorder>
+     <zorder>lineEdit_rsi_third_buy_2</zorder>
+     <zorder>checkBox</zorder>
+     <zorder>checkBox_2</zorder>
     </widget>
     <widget class="QGroupBox" name="groupBox_sell_condition">
      <property name="geometry">

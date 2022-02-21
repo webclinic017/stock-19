@@ -172,7 +172,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @decorators.return_status_msg_setter
     def update_price_db_min(self):
-        # RequestMT() 내의  date + time 를 date 로 합침
+        # RequestMinuate() 내의  date + time 를 date 로 합침
         columns = ['open', 'high', 'low', 'close', 'volume', '거래대금','누적체결매도수량','누적체결매수수량']
         total = self.df_code_name_latest_db.shape[0]
         count = 0
@@ -192,9 +192,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     from_date = int(row['분봉 갱신날짜'] / 10000)
                 else:
                     from_date = 0
-
-                if self.objStockChart.RequestMT(self, code=code, from_date=from_date) == False:
-                    print("RequestMT() return False")
+                    
+                if self.objStockChart.RequestTick(self, code=code, from_date=from_date) == False:
+                    print("RequestMinuate() return False")
                     continue
 
                 df = pd.DataFrame(self.rcv_data, columns=columns,
@@ -207,8 +207,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
                 # 뒤집어서 저장 (결과적으로 date 기준 오름차순으로 저장됨)
                 df = df.iloc[::-1]
-                df.to_sql(name="stock", con=con,
-                          if_exists='append', index_label='date')
+                # df.to_sql(name="stock", con=con,
+                #           if_exists='append', index_label='date')
 
                 self.update_status_msg = '{} / {}'.format(count, total)
                 count += 1
