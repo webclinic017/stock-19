@@ -670,7 +670,7 @@
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLineEdit" name="lineEdit_rsi_period_2">
+     <widget class="QLineEdit" name="lineEdit_volume_day">
       <property name="geometry">
        <rect>
         <x>180</x>
@@ -683,7 +683,7 @@
        <string>10</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="lineEdit_rsi_third_buy_2">
+     <widget class="QLineEdit" name="lineEdit_volume_multiple">
       <property name="geometry">
        <rect>
         <x>310</x>
@@ -760,8 +760,8 @@
      <zorder>lineEdit_rsi_first_buy_total</zorder>
      <zorder>lineEdit_rsi_second_buy_total</zorder>
      <zorder>lineEdit_rsi_third_buy_total</zorder>
-     <zorder>lineEdit_rsi_period_2</zorder>
-     <zorder>lineEdit_rsi_third_buy_2</zorder>
+     <zorder>lineEdit_volume_day</zorder>
+     <zorder>lineEdit_volume_multiple</zorder>
      <zorder>checkBox</zorder>
      <zorder>checkBox_2</zorder>
     </widget>

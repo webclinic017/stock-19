@@ -7,7 +7,8 @@ from pymysql import NULL
 import yfinance as yf
 import my_data_reader
 import threading
-from pycrunch_trace.client.api import trace
+import math
+# from pycrunch_trace.client.api import trace
 
 import time
 
@@ -15,7 +16,7 @@ locale.setlocale(locale.LC_ALL, 'ko_KR')
 
 DEBUG = True
 
-class CustomStrategy(bt.Strategy):
+class RSIStrategy(bt.Strategy):
     # list of parameters which are configurable for the strategy
 
     params = dict(
@@ -128,6 +129,78 @@ class CustomStrategy(bt.Strategy):
                   % (date, action, stock_price, abs(order.size), avg_price, self.holding, cash, value))
 
 
+class VolumeStrategy(bt.Strategy):
+    # list of parameters which are configurable for the strategy
+    class VolumeInd(bt.Indicator):
+        lines = ('volume_AVG',)
+
+        # params = (('period', 10),)
+
+        def __init__(self, period = 10):
+            self.period = period
+
+        def next(self):
+            datasum = math.fsum(self.data.volume.get(size=self.period))
+            self.lines.volume_AVG[0] = datasum / self.period
+
+    params = dict(
+        # rsi 셋팅
+        volume_sum_day = 10,
+        volume_multiple = 5,
+        volume_due_day = 1
+    )
+
+    def __init__(self):
+        self.holding = 0
+        self.sum_price = 0
+        self.started_date = 0
+        self.signal_due_date = 0
+        self.volume_due_day = self.params.volume_due_day
+        bt.ind = self.VolumeInd(period = self.params.volume_sum_day)
+
+    def next(self):
+        # avg = self.sum_volume / self.params.volume_multiple
+        if bt.ind.lines.volume_AVG == 0 :
+            return
+        avg = bt.ind.lines.volume_AVG * self.params.volume_multiple
+        if self.position.size == 0 and avg < self.data.volume[0] : 
+            self.order_target_percent(target=0.9, data=self.data)
+        if self.position.size > 0 :
+            self.volume_due_day = self.volume_due_day -1
+            if self.volume_due_day == 0 : 
+                self.order_target_percent(target=0.0, data=self.data)
+                self.volume_due_day = self.params.volume_due_day 
+        # self.sum_volume = avg * (self.params.volume_multiple-1) / self.params.volume_multiple
+        # self.sum_volume += self.data.volume[0]
+
+    def notify_order(self, order):
+        if order.status not in [order.Completed]:
+            return
+
+        if order.isbuy():
+            action = 'Buy :'
+            sum_factor = 1
+        elif order.issell():
+            action = 'Sell:'
+            sum_factor = -1
+
+        # date = self.data.datetime.date()
+        # stock_price = self.datas[1].close[0]
+        # cash = self.broker.getcash()
+        # value = self.broker.getvalue()
+        # self.holding += order.size
+        # self.sum_price += order.size * stock_price * sum_factor
+        # avg_price = 0
+        # if self.holding != 0:
+        #     avg_price = self.sum_price / self.holding
+        # else:
+        #     self.sum_price = 0
+
+        # if DEBUG:
+        #     print('%s : %s  가격[%d]    주문수량[%d]  평단가[%d]  보유주식[%d]  현금보유[%.0f]  평가잔액[%.0f]'
+        #           % (date, action, stock_price, abs(order.size), avg_price, self.holding, cash, value))
+
+
 class Simulator:
     def __init__(self, cash=100000000, commission=0.3, dataReader = NULL):
         # self.cerebro = bt.Cerebro()  # create a "Cerebro" engine instance
@@ -137,7 +210,7 @@ class Simulator:
         self.MyDataReader = dataReader
 
     # @trace(additional_excludes=['C:\\Users\\qmxmp\\.conda\\envs\\py38_64\\lib\\site-packages'])
-    def simulate_each(self, code="A052400", index_data=NULL, index='^KQ11', start_date='2020-12-01', last_date='2022-01-01', plot=True, db="MyDataReader"):
+    def simulate_each(self, code="A011200", index_data=NULL, index='^KQ11', start_date='2020-12-01', last_date='2022-12-31', plot=True, db="MyDataReader"):
         # code = "000660.KS"  # 하이닉스
         # code = "005930.KS" # 삼성전자
         # code = "306200.KS" # 세아제강
@@ -161,9 +234,9 @@ class Simulator:
         else : 
             data = bt.feeds.PandasData(dataname=yf.download(tickers = code, start = start_date, end = last_date, auto_adjust=True,progress = False, threads=False))
 
-        self.cerebro.adddata(index_data)  # Add the data feed
+        # self.cerebro.adddata(index_data)  # Add the data feed
         self.cerebro.adddata(data)
-        self.cerebro.addstrategy(CustomStrategy)  # Add the trading strategy
+        self.cerebro.addstrategy(VolumeStrategy)  # Add the trading strategy
 
         start_value = self.cerebro.broker.getvalue()
         
@@ -222,4 +295,4 @@ if __name__ == "__main__":
     # datas = yf.download(tickers=self.filter_list['종목코드'], start_date=self.start_date, last_date=self.last_date, auto_adjust=True, progress=True, threads=False)
     # Simulator(dataReader = self.myDataReader).simulate_each(code=code,index_data=self.index_data, start_date=self.start_date, last_date=self.last_date, plot=False, db="MyDataReader")
     
-    Simulator().simulate_each()
+    Simulator(dataReader = my_data_reader.MyDataReader()).simulate_each(db="MyDataReader")
