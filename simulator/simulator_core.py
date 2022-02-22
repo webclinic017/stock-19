@@ -41,6 +41,7 @@ class RSIStrategy(bt.Strategy):
         third_buy=0.95,
     )
 
+
     def __init__(self):
         self.holding = 0
         self.sum_price = 0
